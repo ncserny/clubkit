@@ -175,7 +175,8 @@ export function build(ctx: BuildContext): VenueHooks {
       update(f, night);
     },
     setTime(time) {
-      night = time.night;
+      // the fittings follow whether the club is open, not what the light is
+      night = time.open;
       setTime(night);
     },
   };

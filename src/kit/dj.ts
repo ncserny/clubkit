@@ -520,18 +520,18 @@ function makeGear(stage: Stage, root: THREE.Group): Gear {
   };
 }
 
-/** Merge what was built, and keep it alive: meters on the beat, screens scrolling, records turning; dark by day. */
+/** Merge what was built, and keep it alive: meters on the beat, screens scrolling, records turning; dark while the club is closed. */
 function finishGear(stage: Stage, g: Gear) {
   g.solid.build(g.root);
   g.glow.build(g.root, { cast: false, receive: false });
 
   const lamps = [g.mat.lit, g.mat.beat, g.mat.peak, ...g.mat.waves];
-  // by day the room is empty and the desk is switched off
-  stage.onTime((night) => {
-    for (const m of lamps) m.color.setScalar(night ? 1 : 0.04);
+  // while the club is closed the desk is switched off
+  stage.onTime((open) => {
+    for (const m of lamps) m.color.setScalar(open ? 1 : 0.04);
   });
-  stage.animate(({ t, pulse }, night) => {
-    if (!night) return;
+  stage.animate(({ t, pulse }, open) => {
+    if (!open) return;
     g.mat.beat.color.setScalar(0.15 + 0.85 * pulse);
     g.mat.peak.color.setScalar(pulse > 0.7 ? 1 : 0.05);
     g.mat.waves.forEach((w, i) => (w.map!.offset.x = (t * 0.22 + i * 0.37) % 1));

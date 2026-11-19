@@ -201,7 +201,7 @@ interface CrowdBase {
   armsUp?: boolean;
   /** The DJ wears headphones. Only for an entry that is a DJ on their own; it does nothing for anyone else. */
   headphones?: boolean;
-  /** Only there at these times of day (ids from the plan's times). Always, if left out. */
+  /** Only there at these times of day (ids from the plan's times). If left out: whenever the club is open. */
   times?: string[];
   /** What they wear. The engine's own wardrobe (black, mostly) if left out. */
   dress?: Dress;
@@ -260,8 +260,16 @@ export interface TimeState {
   id: string;
   /** What the button says while this time is showing. */
   label: string;
-  /** Moon and stars, lit windows, street lamps, the night skyline. */
+  /** Moon and stars, lit windows, street lamps, the night skyline. Says what the light is, not whether anybody is there. */
   night: boolean;
+  /**
+   * The club is running: music, crowds, the queue and the door staff, show lights, screens.
+   * When it is false the building is closed and empty: no music but a faint room tone, no
+   * strobe, nobody there unless a crowd names this time, and the fittings switched off. The
+   * visitor can still walk everywhere. Daylight and open go together on a Sunday morning;
+   * dark and closed on a Tuesday night.
+   */
+  open: boolean;
   /** The sun, or at night the moon: compass azimuth (degrees from north, clockwise) and elevation. */
   sun: { azimuth: number; elevation: number; colour: string; intensity: number; indoors: boolean };
   hemi: { sky: string; ground: string; intensity: number; indoors: number };
@@ -380,8 +388,10 @@ export interface FrameState {
   bar: number;
   /** 1 on the beat, falling to 0 before the next. */
   pulse: number;
-  /** 1 while the strobe is lit. */
+  /** 1 while the strobe is lit. Always 0 while the club is closed. */
   strobe: number;
+  /** The club is running at this time of day: see `TimeState.open`. */
+  open: boolean;
   zone: Zone;
   time: TimeState;
   camera: THREE.Camera;

@@ -214,6 +214,7 @@ const times: TimeState[] = [
     id: 'night',
     label: 'Saturday 01:00',
     night: true,
+    open: true,
     sun: { azimuth: 150, elevation: 32, colour: '#9fb0d8', intensity: 0.22, indoors: false },
     hemi: { sky: '#3a4258', ground: '#2a1d14', intensity: 0.32, indoors: 0.02 },
     sky: { top: '#04050a', mid: '#0f1019', horizon: '#4a2e22', sun: '#000000' },
@@ -229,6 +230,8 @@ const times: TimeState[] = [
     id: 'morning',
     label: 'Sunday 11:00',
     night: false,
+    // Sunday morning: daylight, and the club still running
+    open: true,
     sun: { azimuth: 160, elevation: 42, colour: '#fff1dc', intensity: 3.2, indoors: true },
     hemi: { sky: '#b9cde6', ground: '#6b6358', intensity: 1.1, indoors: 0.04 },
     sky: { top: '#4b78b8', mid: '#8db0d8', horizon: '#d9dfe2', sun: '#fff2d8' },

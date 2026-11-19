@@ -73,6 +73,23 @@ export function isMuted() {
 export function setMuted(value: boolean) {
   muted = value;
   if (master && ctx) master.gain.setTargetAtTime(muted ? 0 : 0.8, ctx.currentTime, 0.05);
+  if (muted && tone && ctx) tone.gain.setTargetAtTime(0, ctx.currentTime, 0.05);
+}
+
+/** The sound of an empty building: ventilation and a mains hum. Its own fader, past the music's. */
+let tone: GainNode | null = null;
+let toneNow = -1;
+
+/**
+ * How much room tone is heard: 0 while the club is open, a little while it is closed. The
+ * engine calls this every frame with the level for where the listener stands.
+ */
+export function setRoomTone(level: number) {
+  if (!ctx || !tone) return;
+  const target = muted ? 0 : level;
+  if (target === toneNow) return;
+  toneNow = target;
+  tone.gain.setTargetAtTime(target, ctx.currentTime, 0.6);
 }
 
 /** How much of the echo is mixed in where a zone does not say. */
@@ -161,6 +178,41 @@ export function startAudio() {
   wet.connect(master);
 
   const noise = noiseBuffer(ctx);
+  // The room tone: air moving in ducts (noise, low and soft), a fridge somewhere (a narrow band
+  // higher up) and the mains (50 Hz and its octave). Always running, heard only when faded up.
+  tone = ctx.createGain();
+  tone.gain.value = 0;
+  toneNow = -1;
+  tone.connect(ctx.destination);
+  const air = ctx.createBufferSource();
+  air.buffer = noise;
+  air.loop = true;
+  const duct = ctx.createBiquadFilter();
+  duct.type = 'lowpass';
+  duct.frequency.value = 190;
+  duct.Q.value = 0.3;
+  const ductLevel = ctx.createGain();
+  ductLevel.gain.value = 0.9;
+  air.connect(duct).connect(ductLevel).connect(tone);
+  const fridge = ctx.createBiquadFilter();
+  fridge.type = 'bandpass';
+  fridge.frequency.value = 620;
+  fridge.Q.value = 6;
+  const fridgeLevel = ctx.createGain();
+  fridgeLevel.gain.value = 0.12;
+  air.connect(fridge).connect(fridgeLevel).connect(tone);
+  air.start();
+  for (const [hz, level] of [
+    [50, 0.1],
+    [100, 0.035],
+  ]) {
+    const hum = ctx.createOscillator();
+    hum.frequency.value = hz;
+    const humLevel = ctx.createGain();
+    humLevel.gain.value = level;
+    hum.connect(humLevel).connect(tone);
+    hum.start();
+  }
   decks = {};
   heard = undefined;
   for (const id of Object.keys(LOOPS) as TrackId[]) {
@@ -498,7 +550,7 @@ export function audioState() {
   if (!ctx || !wall || !master) return null;
   const faders: Record<string, number> = {};
   for (const id of Object.keys(decks) as TrackId[]) faders[id] = +decks[id]!.fader.gain.value.toFixed(3);
-  return { running: ctx.state === 'running', heard: heard ?? null, bpm: tempoOf(heard), faders, echo: +delay!.delayTime.value.toFixed(3), cutoff: Math.round(wall.frequency.value), level: +master.gain.value.toFixed(3) };
+  return { running: ctx.state === 'running', heard: heard ?? null, bpm: tempoOf(heard), faders, echo: +delay!.delayTime.value.toFixed(3), cutoff: Math.round(wall.frequency.value), level: +master.gain.value.toFixed(3), roomTone: +(tone?.gain.value ?? 0).toFixed(4) };
 }
 
 /**

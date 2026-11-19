@@ -45,7 +45,7 @@ If you build something another club could use, put it in `src/kit/`, export it f
 - **Dark rooms are not black.** Give walls a painted texture with wear at hand and shoulder height, and keep tags small and pale. Bright, saturated graffiti indoors looks like stickers.
 - **Light is the dressing.** A club is seen by its own light. Give each room two or three coloured point lights in a set of its own, name only that set in the room's zone, and let fixtures pulse with `f.pulse`. Add a plain white working light for the daytime state.
 - **Clutter overhead.** Beams, ducts, cable trays and hung fixtures do more for a hall than anything at eye level.
-- **By day and by night.** Every venue has an empty daytime state. Signs and screens go dark, tube lights come on.
+- **Open and closed.** A time of day has `night` (the light) and `open` (the club running). Give every venue an open night and one other state: closed by day if it shuts, open in daylight if it runs through the morning. Closed is handled for you: no music, no crowds, no strobe, kit fittings off. Add what the closed building has of its own: tube lights on, a working light, signs dark.
 - **Signs and words** carry a place: the notice on a column, the ticker under the stage, the sign over the bar. Paint them on a canvas.
 
 ## Rules that will save you

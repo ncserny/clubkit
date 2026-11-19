@@ -594,7 +594,8 @@ export function build(ctx: BuildContext): VenueHooks {
       stages.update(f, night);
     },
     setTime(time) {
-      night = time.night;
+      // the fittings follow whether the club is open, not what the light is
+      night = time.open;
       spots.visible = night;
       for (const b of ballBeams) b.mesh.visible = night;
       if (!night) for (const m of [dots, acl, lens, bars]) m.color.set('#2a2c30');
