@@ -348,6 +348,8 @@ const lights: LightSpec[] = [
   { id: 'cafe-1', set: 'cafe', type: 'point', at: [27, Q + 2.7, -5], colour: '#ff5a3a', intensity: 14, range: 14, decay: 1.7 },
   { id: 'cafe-bar', set: 'cafe', type: 'point', at: [18.5, Q + 2.6, CAFE.z0 + 1.2], colour: '#cfe6ff', intensity: 10, range: 9, decay: 1.8 },
   { id: 'foyer', set: 'foyer', type: 'point', at: [4.6, Q + 2.6, -4], colour: '#ffd9b0', intensity: 9, range: 9, decay: 1.7 },
+  // red light spilling out of the passage into the hall, so the way on is the brightest thing in the foyer
+  { id: 'foyer-passage', set: 'foyer', type: 'point', at: [4.5, Q + 1.8, 0.2], colour: '#ff3a2a', intensity: 14, range: 7, decay: 1.6 },
   { id: 'wc-0', set: 'wc', type: 'point', at: [40, Q + 2.5, -2.2], colour: '#e8f0ff', intensity: 9, range: 9, decay: 1.7 },
   { id: 'wc-1', set: 'wc', type: 'point', at: [47.5, Q + 2.5, -2.2], colour: '#ffd0e8', intensity: 9, range: 9, decay: 1.7 },
   // the quay: lamps along the frontage and in the garden, the glow of the door
