@@ -24,6 +24,8 @@ function chosen() {
 function choose() {
   const list = document.getElementById('cw-choose-list');
   if (!list) return;
+  // the build may have written the cards already; these replace them
+  list.replaceChildren();
   for (const v of catalogue) {
     const a = document.createElement('a');
     // a folder of its own under wherever the chooser is served from
@@ -43,6 +45,15 @@ function choose() {
     list.append(a);
   }
   // the title the page came with stays: it names the collection, and every venue sets its own
+  // a link back to the site this is part of, if the build names one
+  const site = document.getElementById('cw-site') as HTMLAnchorElement | null;
+  const name = import.meta.env.VITE_SITE_NAME as string | undefined;
+  const homeUrl = import.meta.env.VITE_SITE_HOME as string | undefined;
+  if (site && name && homeUrl) {
+    site.textContent = name;
+    site.href = homeUrl;
+    site.hidden = false;
+  }
   document.documentElement.dataset.cwState = 'choose';
 }
 

@@ -550,3 +550,15 @@ html[data-cw-state='choose'] :is(.cw-bar, #cw-intro, .cw-caption, .cw-views, .cw
     transition: none;
   }
 }
+.cw-site {
+  position: fixed;
+  left: 1rem;
+  bottom: max(0.6rem, env(safe-area-inset-bottom));
+  font-size: 0.6875rem;
+  color: var(--cw-muted);
+  text-decoration: none;
+}
+.cw-site:hover,
+.cw-site:focus-visible {
+  color: var(--cw-ink);
+}

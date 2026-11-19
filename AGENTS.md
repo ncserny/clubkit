@@ -22,6 +22,10 @@ The clubs share what is the same in real life: DJ equipment, speaker cabinets, t
 
 A venue's `plan.ts` keeps what comes from a source in `MEASURED` and what is estimated in `GUESS`. Do not present a guess as a fact, in the plan or in the venue's copy.
 
+## Pull requests only
+
+`main` is protected: every change arrives as a pull request from a branch, yours included. Never push to `main`. `CONTRIBUTING.md` is the guide for outside contributors; follow it too.
+
 ## Checks before a push
 
 - `npm run typecheck` and `npm run build`.

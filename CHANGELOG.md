@@ -6,6 +6,9 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Added
 
+- **Contributing by pull request.** `CONTRIBUTING.md` says how to add a club or a component, what a new club's pull request needs, and what the license means for a contribution. Pull requests start from a template with the checks to run. `main` takes changes by pull request only.
+- **Pages that read without JavaScript.** The build writes the chooser's cards into the start page, and each venue's name, city and opening line into its own page, so search engines and link previews see real text.
+- **Hosting the build on a site of your own.** The build reads four optional settings: `SITE_URL` and `SHARE_IMAGE` add a canonical link and link-preview tags to the start page and to every venue's page, and `VITE_SITE_NAME` with `VITE_SITE_HOME` put a small link back to your site on the start page.
 - **Start page, "Clubs Worldwide".** Opening the page without `?venue=` now lists the clubs to choose from: Berghain (Berlin), Ministry of Sound (London) and Flex (Vienna). Each card is a link, so a choice can be shared. A build made with `VITE_VENUE` still opens that venue directly.
 - **Flex: the hall's bar.** The steel bar on the left of the hall, on its plinth, with crates lit blue behind it and the COCKTAILS sign in red letters and bulbs above.
 - **Flex: the café, from photographs.** The bar now stands on a raised side along the canal, behind three winding concrete steps edged in red light, with red stools and blue crates. Red and black leather sofas on castors, a silver duct along the inner wall with its branch to the floor, strips of tube light on the red ceiling, and a plywood deck on scissor legs with old par cans, LED bars and the glass doors beside it.
@@ -21,6 +24,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Changed
 
+- **Ministry of Sound:** the crest is stored as lossless WebP instead of PNG. It is the same picture, pixel for pixel.
 - **Addresses.** Every venue has an address of its own, `/berghain/`, `/mos/`, `/flex/`, in place of `?venue=berghain`. The build writes a page per venue, each with the venue's name in its title, and every venue page has a link back to the start page. Viewpoints and the time of day stay in the query (`/flex/?view=floor`). The old `?venue=` form is still read.
 - **Berghain: the booth's decks.** The four turntables and the mixer on the main floor are now the kit's DJ equipment, the same finely made pieces that stand in Ministry of Sound and Flex. The drum machine, the record crate and the DJ stay Berghain's own, as does everything else about the room: only the DJ equipment is shared between the clubs.
 - **Kit: `djPieces`** places single turntables, media players and mixers anywhere on a desk, for a booth that is not one of the two ready layouts. `DJ_SIZES` gives their sizes.
