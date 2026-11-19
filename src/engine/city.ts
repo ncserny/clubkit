@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { canvasTexture, rng } from './util';
-import { Batch, along, boxAt, extrude, groundPolygon, offsetPath, polylineLength, ribbon, centroid } from './geom';
+import { Batch, along, boxAt, extrude, groundPolygon, offsetPath, pointInPolygon, polylineLength, ribbon, centroid } from './geom';
 import { asphalt, brick, gravel, scrub, tiled } from './materials';
 import type { Solid } from './nav';
 import type { Obstacle, Surroundings, TimeState } from './types';
@@ -137,7 +137,34 @@ export interface City {
   update(t: number, time: TimeState): void;
 }
 
-export function buildCity(data: MapData, opts: Surroundings): City {
+/** Is a point inside any of these outlines? */
+const insideAny = (list: P[][], x: number, z: number) => list.some((p) => pointInPolygon(x, z, p));
+
+/**
+ * The map without what stands in sunken ground (a canal, a quay below the street): the venue
+ * draws what is down there. Bridges stay. A line is left out when most of it is in the cut.
+ */
+function withoutCut(data: MapData, cut: P[][], decks: P[][]): MapData {
+  const sunk = (x: number, z: number) => insideAny(cut, x, z) && !insideAny(decks, x, z);
+  const mostlySunk = (p: P[]) => {
+    const pts = p.length > 1 ? along(p, 2).map((s) => [s.x, s.z] as P) : p;
+    return pts.filter(([x, z]) => sunk(x, z)).length > pts.length / 2;
+  };
+  return {
+    ...data,
+    buildings: data.buildings.filter((b) => !sunk(...centroid(b.p))),
+    roads: data.roads.filter((r) => r.bridge || !mostlySunk(r.p)),
+    rails: data.rails.filter((r) => r.bridge || !mostlySunk(r.p)),
+    areas: data.areas.filter((a) => !sunk(...centroid(a.p))),
+    fences: data.fences.filter((f) => !mostlySunk(f.p)),
+    entrances: data.entrances.filter(([x, z]) => !sunk(x, z)),
+  };
+}
+
+export function buildCity(dataIn: MapData, optsIn: Surroundings, sunken: { cut: P[][]; decks: P[][] } = { cut: [], decks: [] }): City {
+  const hasCut = sunken.cut.length > 0;
+  const data = hasCut ? withoutCut(dataIn, sunken.cut, sunken.decks) : dataIn;
+  const opts: Surroundings = hasCut ? { ...optsIn, keepClear: (x, z) => (insideAny(sunken.cut, x, z) && !insideAny(sunken.decks, x, z)) || !!optsIn.keepClear?.(x, z) } : optsIn;
   const extras = opts.extras ?? {};
   const group = new THREE.Group();
   group.name = 'city';
@@ -148,7 +175,13 @@ export function buildCity(data: MapData, opts: Surroundings): City {
   scrubMat.map!.repeat.set(1 / 14, 1 / 14);
   // a city centre is paved from wall to wall; elsewhere open land is scrub
   const groundMat = opts.paved ? new THREE.MeshStandardMaterial({ map: tiled(asphalt(31), 1 / 12, 1 / 12), color: '#8f8c86', roughness: 0.95 }) : scrubMat;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000).rotateX(-Math.PI / 2), groundMat);
+  // with sunken ground the plane has a hole for each cut; drawn in x, -z and stood flat
+  const groundShape = () => {
+    const shape = new THREE.Shape([new THREE.Vector2(-1500, -1500), new THREE.Vector2(1500, -1500), new THREE.Vector2(1500, 1500), new THREE.Vector2(-1500, 1500)]);
+    for (const c of sunken.cut) shape.holes.push(new THREE.Path(c.map(([x, z]) => new THREE.Vector2(x, -z))));
+    return new THREE.ShapeGeometry(shape).rotateX(-Math.PI / 2);
+  };
+  const ground = new THREE.Mesh(hasCut ? groundShape() : new THREE.PlaneGeometry(3000, 3000).rotateX(-Math.PI / 2), groundMat);
   // planar UV in metres
   const gp = ground.geometry.attributes.position as THREE.BufferAttribute;
   const guv = ground.geometry.attributes.uv as THREE.BufferAttribute;
@@ -159,7 +192,14 @@ export function buildCity(data: MapData, opts: Surroundings): City {
   const grassMat = new THREE.MeshStandardMaterial({ map: tiled(scrub(18), 1 / 9, 1 / 9), color: '#8fa070', roughness: 1 });
   const pavingMat = new THREE.MeshStandardMaterial({ map: tiled(asphalt(31), 1 / 12, 1 / 12), color: '#9a978f', roughness: 0.95 });
   const ballastMat = new THREE.MeshStandardMaterial({ map: tiled(gravel(41), 1 / 6, 1 / 6), color: '#8d8478', roughness: 1 });
+  const waterMat = new THREE.MeshStandardMaterial({ color: '#1c2b30', roughness: 0.18, metalness: 0.55 });
   for (const a of data.areas) {
+    // a bridge is drawn by its road; water lies flat unless the venue has sunk it and draws it itself
+    if (a.kind === 'bridge' || (a.kind === 'water' && hasCut)) continue;
+    if (a.kind === 'water') {
+      if (a.p.length > 2) batch.add(waterMat, groundPolygon(a.p, 0.03));
+      continue;
+    }
     const mat = ['grass', 'park', 'garden', 'playground', 'pitch'].includes(a.kind) ? grassMat : a.kind === 'railway' || a.kind === 'brownfield' ? ballastMat : pavingMat;
     if (a.p.length < 3) continue;
     batch.add(mat, groundPolygon(a.p, a.kind === 'residential' || a.kind === 'commercial' || a.kind === 'retail' ? 0.01 : 0.02));

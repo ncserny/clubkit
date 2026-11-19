@@ -297,6 +297,15 @@ export interface Outdoors {
   street: OutdoorZone & { name: string };
   doorstep: OutdoorZone & { name: string; radius: number; musicRadius: number };
   aerial: { name: string; above: number; speed: number; lightSets: string[]; caption?: Caption };
+  /**
+   * Ground that is not there: a canal, a sunken quay, a cutting. Nobody walks off the street into
+   * it, and the city draws no ground, road, rail, tree, lamp or building in it: the venue draws
+   * what is down there, and its rooms (open ones for a quay) are the only floor. A walker gets in
+   * and out by a stair from `outside`. Someone flying stays above street level over it.
+   */
+  cut?: { area: Area; frame?: FrameName }[];
+  /** Parts of a cut that are bridged at street level: the ground is there again, to walk on. */
+  decks?: { area: Area; frame?: FrameName }[];
   /** Where the sun's shadow map is centred, in world coordinates, and how far it reaches. */
   shadowFocus: Vec3;
   shadowReach: number;

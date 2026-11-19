@@ -7,7 +7,7 @@ import { buildLights, type LightRig } from './lights';
 import { buildNav, type Nav } from './nav';
 import { type Crowd, setCrowdBeat, setFigureDetail } from './people';
 import type { Quality } from './quality';
-import type { BuildContext, TimeState, VenueModule, VenuePlan, Viewpoint, Zone } from './types';
+import type { Area, BuildContext, FrameName, Pt, Rect, TimeState, VenueModule, VenuePlan, Viewpoint, Zone } from './types';
 import { setTextureScale } from './util';
 
 export type { Zone };
@@ -59,7 +59,13 @@ export async function buildWorld(scene: THREE.Scene, renderer: THREE.WebGLRender
   const frame = makeFrame(plan.frame);
   setTextureScale(venue.textureScale?.[opts.quality.level] ?? 1);
   await opts.step(plan.copy.loading.map, 0.12);
-  const city = buildCity(venue.map, venue.surroundings);
+  // sunken ground, in world coordinates, for the city and for walking
+  const worldArea = (a: { area: Area; frame?: FrameName }): Pt[] => {
+    const pts: Pt[] = typeof a.area[0] === 'number' ? (([x0, z0, x1, z1]) => [[x0, z0], [x1, z0], [x1, z1], [x0, z1]] as Pt[])(a.area as Rect) : (a.area as Pt[]);
+    return a.frame === 'world' ? pts : pts.map(([x, z]) => frame.worldXZ(x, z));
+  };
+  const sunken = { cut: (plan.outdoors.cut ?? []).map(worldArea), decks: (plan.outdoors.decks ?? []).map(worldArea) };
+  const city = buildCity(venue.map, venue.surroundings, sunken);
   scene.add(city.group);
   await opts.step(plan.copy.loading.venue, 0.4);
 
@@ -87,7 +93,7 @@ export async function buildWorld(scene: THREE.Scene, renderer: THREE.WebGLRender
   const people = ctx.populate();
   const lights = ctx.light();
   scene.add(root);
-  const nav = buildNav(plan, frame, city.solids, city.obstacles);
+  const nav = buildNav(plan, frame, city.solids, city.obstacles, sunken);
   await opts.step(plan.copy.loading.lights, 0.72);
 
   const pmrem = new THREE.PMREMGenerator(renderer);

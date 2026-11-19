@@ -1,8 +1,18 @@
 # Club Kit
 
-A walkable 3D model of a nightclub, built in the browser. The code is in two parts: an **engine** that knows nothing about any particular club, and **venues**, each a folder of data and a build script.
+A framework for building walkable 3D nightclubs in the browser, and a library of the parts clubs are made of.
 
-Venues so far: `mos` (Ministry of Sound, London; the default) and `berghain` (Berghain, Berlin).
+It comes in three layers:
+
+- **`src/engine/`**: the framework. It knows nothing about any particular club. It is handed a plan (rooms, doors, stairs, lights, crowds, viewpoints) and does the rest: walking and collision, lighting, crowds, synthesised music, the city around the venue from OpenStreetMap, quality levels.
+- **`src/kit/`**: the components library. DJ equipment, speaker stacks, moving lights, strobes, mirror balls, LED walls, bars, sofas, truss, railings, dancers, bouncers, queues. Any venue can use them.
+- **`src/venues/<id>/`**: the clubs. Each is a folder of data and a build script.
+
+| Venue | id | State |
+|---|---|---|
+| Ministry of Sound, London | `mos` (the default) | Fully dressed |
+| Berghain, Berlin | `berghain` | Fully dressed |
+| Flex, Vienna | `flex` | First pass: measured and fitted out from the kit, surfaces still plain |
 
 There are no model files. Every shape and texture is generated in code when the page loads. Each venue brings one data file, its surroundings from OpenStreetMap.
 
@@ -15,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Then open the address Vite prints (normally http://localhost:5173). `?venue=<id>` picks a venue; without it the page shows the one named in the `VITE_VENUE` environment variable, or the default in `src/venues/index.ts`.
+Then open the address Vite prints (normally http://localhost:5173). `npm run dev:mos`, `npm run dev:berghain` and `npm run dev:flex` open a venue directly. `?venue=<id>` picks a venue; without it the page shows the one named in the `VITE_VENUE` environment variable, or the default in `src/venues/index.ts`.
 
 `npm run build` writes a static site to `dist/` (relative paths, so it can be served from any folder). `npm run typecheck` runs TypeScript.
 
@@ -48,6 +58,54 @@ Keys held with Ctrl, Cmd or Alt are left to the browser.
 | `detail` | `lite`, `balanced`, `ultra` | Force a quality level |
 | `ui` | `0` | Hide all interface, for screenshots |
 | `cull` | `0` | Ministry of Sound only: draw every room all the time, for checking the culling |
+
+## The components library
+
+Everything in `src/kit/` is exported from `src/kit/index.ts`.
+
+| Group | Components |
+|---|---|
+| DJ equipment | `djBooth` (a desk with the gear on it), `djGear` (media players, mixer, turntables, in the `full` or `cdjs` layout). Screens scroll and platters turn with the music. |
+| Lighting | `movingHeads` (fixtures that swing beams through the haze), `mirrorBall`, `strobe`, `parCan`, `ledScreen`, `swirlScreen`, `playScreens` |
+| Sound | `speakerStack`, `speakerCabinet` |
+| People | `dancers`, `talkers`, `bouncer`, `doorStaff`, `dj`, `queue`, `group`, `person`, and the `WARDROBE` presets |
+| Structure | `railing`, `trussLeg`, `trussRun`, `openStair`, `openLeaves`, `barrierLine` |
+| Furniture | `barCounter`, `sofa`, `bottles` |
+| Finishes | `makeMats` (plain materials), `graffitiWall` |
+| Shapes | `box`, `along`, `cyl`, `tube`, `panel`, `quad4` |
+
+Geometry components are drawn onto a **stage**: a group in the scene, a batch that merges solid parts by material, the materials, and hooks for the beat and the time of day. Coordinates are metres, `[x, z]` on the floor and `y` up.
+
+```ts
+import * as K from '../../kit';
+
+export function build(ctx: BuildContext): VenueHooks {
+  const blockout = buildBlockout(ctx, { byRoom: true });       // the plan as plain blocks
+  const stages = K.makeStages(ctx.quality, K.makeMats(ctx.quality));
+  const floor = stages.stage(blockout.rooms.get('floor')!);
+
+  K.djBooth(floor, { at: [0, -6], y: 0 });
+  K.speakerStack(floor, [-3, -6], 0, 0, { columns: 2, rows: 3 });
+  K.mirrorBall(floor, { at: [0, 4.2, 0], spots: 60 });
+  K.strobe(floor, { at: [0, 4.5, -3], tilt: Math.PI / 2 });
+  stages.finish();
+
+  return { update: (f) => stages.update(f, f.time.night), setTime: (t) => stages.setTime(t.night) };
+}
+```
+
+People are data, not geometry. The helpers return crowd entries for the plan, and the engine draws each crowd as one instanced mesh:
+
+```ts
+crowds: [
+  K.dancers({ room: 'floor', rect: [-5, -5, 5, 5], y: 0, count: [40, 90, 150], seed: 1, faceTo: [0, -6] }),
+  K.queue({ path: [[0, 12], [0, 30]], y: 0, seed: 2, staff: [K.bouncer(-1, 11, 0, 0)] }),
+],
+```
+
+The room's own strobe flash belongs to the engine: `plan.show.strobe` says when it fires, never faster than 2.9 flashes a second, and not at all for visitors whose system asks for reduced motion. The `strobe` component shows the lamp.
+
+`src/venues/flex/` is the shortest worked example: it is built almost entirely from the kit.
 
 ## What is in `src/`
 
@@ -91,11 +149,11 @@ Ministry of Sound splits its dressing over more files:
 |---|---|
 | `build.ts` | Which finish each room's floor, walls and ceiling get, then the block model in those finishes, the dressing, the crowds and the culling. |
 | `textures.ts` | The venue's own painted textures and signs: paving, blockwork, brick, boards, hedge, velvet, speaker grilles, posters, LED screens, the neighbours' fronts. |
-| `kit.ts` | Parts used in more than one room: railings, open stairs, truss, sofas, bottles, mirror balls, speaker cabinets, moving heads, LED screens. |
+| `kit.ts` | A stage for every room, and the kit's components on this venue's two grids. |
 | `dress-exterior.ts` | Gaunt Street and the courtyard: pavement, gates, queue signs and barriers, banner, truss lane, hedge, container bar, overhang, canopy, shutter with the crest. |
 | `dress-ground.ts` | Lobby, tunnel, box office, cloakroom, The 103, the two Box tunnels. |
 | `dress-box.ts` | The Box: booth, lattice, video, speaker stacks, stairs, balcony. |
-| `booth-gear.ts` | What stands on a DJ desk: the CDJ-3000, the mixer and the turntable. The Box has four players, two turntables and a mixer; The Baby Box, The Loft and The 103 have two players and a mixer. |
+| `booth-gear.ts` | Puts the kit's DJ equipment on the four desks. The Box has four players, two turntables and a mixer; The Baby Box, The Loft and The 103 have two players and a mixer. |
 | `dress-arches.ts` | The Baby Box, Arch80, toilets, load-in. |
 | `dress-upstairs.ts` | The Lounge, the green room, The Loft. |
 
@@ -143,13 +201,13 @@ Other settings, all environment variables: `CHROME` is the browser to start if i
 
 1. Make `src/venues/<id>/` with `plan.ts`, `copy.ts`, `surroundings.ts`, `build.ts`, `osm.json` and `index.ts`, following `types.ts`.
 2. Get the map data: `node tools/fetch-osm.mjs <lat> <lon> <radius in metres> src/venues/<id>/osm.json`. It asks the Overpass API, trying several mirrors with a growing wait between attempts, and converts the answer to metres around the given point.
-3. Start `build.ts` with `buildBlockout(ctx)` from `engine/blockout.ts`. That draws the plan as plain blocks, which is enough to walk it and check it against the sources. Dress it afterwards.
+3. Start `build.ts` with `buildBlockout(ctx)` from `engine/blockout.ts`. That draws the plan as plain blocks, which is enough to walk it and check it against the sources. Then fit it out from the kit (see `venues/flex/build.ts`) and dress it afterwards.
 4. Add it to `src/venues/index.ts`.
 5. Open `/?venue=<id>`.
 
 ## Ministry of Sound: coordinates and what is guessed
 
-`venues/mos/` is a model of 103 Gaunt Street, London SE1, built from the research in the project's `docs/ministry-of-sound-research.md`. Rooms, doors, stairs and fittings are in the right places and at the right sizes as far as the sources go, and each room is dressed from the photographs the research describes.
+`venues/mos/` is a model of 103 Gaunt Street, London SE1, built from research into the building (plans, licensing drawings, photographs). Rooms, doors, stairs and fittings are in the right places and at the right sizes as far as the sources go, and each room is dressed from the photographs the research describes.
 
 All lengths are metres, y is up.
 
@@ -166,6 +224,22 @@ All lengths are metres, y is up.
 **Times of day.** `night` (Saturday, 01:30, with the queue and the crowds) and `day` (empty).
 
 Not affiliated with Ministry of Sound. The name and the crest are the club's and are used only to identify the building.
+
+## Flex: coordinates and what is guessed
+
+`venues/flex/` is a first pass at Flex, Augartenbrücke 1, Vienna, built from `docs/flex-research.md`. That file marks every fact as sourced or guessed, and `plan.ts` keeps the same split in `MEASURED` and `GUESS`.
+
+**Frame.** The origin is the north-west end of the club's frontage on the quay wall. x runs along the wall downstream, toward the stage; z is negative toward the Donaukanal and positive inland, under the road. y is up from the street, so the quay is at about -6.5 and the water below that.
+
+**Sunken ground.** The canal and its quays lie below the street. The plan says so with `outdoors.cut` (ground that is not there) and `outdoors.decks` (the bridge across it): the city leaves the cut alone, nobody walks off the street into it, and the venue draws the quays, the walls and the water. The way down is a stair from `outside`.
+
+**Measured.** From the club's own technical drawings: the stage (1.02 m high, 5.7 m wide), the speaker columns 4.88 m apart, the mixing desk 7.86 m from the stage, the 5 by 3 m LED wall, the 19 by 8 grid of spots.
+
+**Guessed.** The length and height of the hall, the height of the street above the quay, where the door, the cashier and the bars are, and how the café and the hall lie against each other.
+
+**Who is playing.** The booth in the hall is a homage to Electric Indigo. The figure is the same figure as everyone else, and the techno is synthesised, not hers.
+
+Not affiliated with Flex or with Electric Indigo.
 
 ## Berghain: coordinates and measurements
 
@@ -200,7 +274,7 @@ Not affiliated with Berghain.
 
 - Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, under the Open Database License. Keep this credit visible wherever a venue's `osm.json` or anything derived from it is shown.
 - Rendering: [Three.js](https://threejs.org/) r186.
-- The booth on Berghain's main floor is a homage to Jeff Mills. The DJ figure depicts nobody in particular.
+- The booth on Berghain's main floor is a homage to Jeff Mills, and the booth in Flex's hall to Electric Indigo. The DJ figures depict nobody in particular.
 # Club Kit
 
 A walkable 3D model of a nightclub, built in the browser. The code is in two parts: an **engine** that knows nothing about any particular club, and **venues**, each a folder of data and a build script.
@@ -218,7 +292,7 @@ npm install
 npm run dev
 ```
 
-Then open the address Vite prints (normally http://localhost:5173). `?venue=<id>` picks a venue; without it the page shows the one named in the `VITE_VENUE` environment variable, or the default in `src/venues/index.ts`.
+Then open the address Vite prints (normally http://localhost:5173). `npm run dev:mos`, `npm run dev:berghain` and `npm run dev:flex` open a venue directly. `?venue=<id>` picks a venue; without it the page shows the one named in the `VITE_VENUE` environment variable, or the default in `src/venues/index.ts`.
 
 `npm run build` writes a static site to `dist/` (relative paths, so it can be served from any folder). `npm run typecheck` runs TypeScript.
 
@@ -251,6 +325,54 @@ Keys held with Ctrl, Cmd or Alt are left to the browser.
 | `detail` | `lite`, `balanced`, `ultra` | Force a quality level |
 | `ui` | `0` | Hide all interface, for screenshots |
 | `cull` | `0` | Ministry of Sound only: draw every room all the time, for checking the culling |
+
+## The components library
+
+Everything in `src/kit/` is exported from `src/kit/index.ts`.
+
+| Group | Components |
+|---|---|
+| DJ equipment | `djBooth` (a desk with the gear on it), `djGear` (media players, mixer, turntables, in the `full` or `cdjs` layout). Screens scroll and platters turn with the music. |
+| Lighting | `movingHeads` (fixtures that swing beams through the haze), `mirrorBall`, `strobe`, `parCan`, `ledScreen`, `swirlScreen`, `playScreens` |
+| Sound | `speakerStack`, `speakerCabinet` |
+| People | `dancers`, `talkers`, `bouncer`, `doorStaff`, `dj`, `queue`, `group`, `person`, and the `WARDROBE` presets |
+| Structure | `railing`, `trussLeg`, `trussRun`, `openStair`, `openLeaves`, `barrierLine` |
+| Furniture | `barCounter`, `sofa`, `bottles` |
+| Finishes | `makeMats` (plain materials), `graffitiWall` |
+| Shapes | `box`, `along`, `cyl`, `tube`, `panel`, `quad4` |
+
+Geometry components are drawn onto a **stage**: a group in the scene, a batch that merges solid parts by material, the materials, and hooks for the beat and the time of day. Coordinates are metres, `[x, z]` on the floor and `y` up.
+
+```ts
+import * as K from '../../kit';
+
+export function build(ctx: BuildContext): VenueHooks {
+  const blockout = buildBlockout(ctx, { byRoom: true });       // the plan as plain blocks
+  const stages = K.makeStages(ctx.quality, K.makeMats(ctx.quality));
+  const floor = stages.stage(blockout.rooms.get('floor')!);
+
+  K.djBooth(floor, { at: [0, -6], y: 0 });
+  K.speakerStack(floor, [-3, -6], 0, 0, { columns: 2, rows: 3 });
+  K.mirrorBall(floor, { at: [0, 4.2, 0], spots: 60 });
+  K.strobe(floor, { at: [0, 4.5, -3], tilt: Math.PI / 2 });
+  stages.finish();
+
+  return { update: (f) => stages.update(f, f.time.night), setTime: (t) => stages.setTime(t.night) };
+}
+```
+
+People are data, not geometry. The helpers return crowd entries for the plan, and the engine draws each crowd as one instanced mesh:
+
+```ts
+crowds: [
+  K.dancers({ room: 'floor', rect: [-5, -5, 5, 5], y: 0, count: [40, 90, 150], seed: 1, faceTo: [0, -6] }),
+  K.queue({ path: [[0, 12], [0, 30]], y: 0, seed: 2, staff: [K.bouncer(-1, 11, 0, 0)] }),
+],
+```
+
+The room's own strobe flash belongs to the engine: `plan.show.strobe` says when it fires, never faster than 2.9 flashes a second, and not at all for visitors whose system asks for reduced motion. The `strobe` component shows the lamp.
+
+`src/venues/flex/` is the shortest worked example: it is built almost entirely from the kit.
 
 ## What is in `src/`
 
@@ -294,11 +416,11 @@ Ministry of Sound splits its dressing over more files:
 |---|---|
 | `build.ts` | Which finish each room's floor, walls and ceiling get, then the block model in those finishes, the dressing, the crowds and the culling. |
 | `textures.ts` | The venue's own painted textures and signs: paving, blockwork, brick, boards, hedge, velvet, speaker grilles, posters, LED screens, the neighbours' fronts. |
-| `kit.ts` | Parts used in more than one room: railings, open stairs, truss, sofas, bottles, mirror balls, speaker cabinets, moving heads, LED screens. |
+| `kit.ts` | A stage for every room, and the kit's components on this venue's two grids. |
 | `dress-exterior.ts` | Gaunt Street and the courtyard: pavement, gates, queue signs and barriers, banner, truss lane, hedge, container bar, overhang, canopy, shutter with the crest. |
 | `dress-ground.ts` | Lobby, tunnel, box office, cloakroom, The 103, the two Box tunnels. |
 | `dress-box.ts` | The Box: booth, lattice, video, speaker stacks, stairs, balcony. |
-| `booth-gear.ts` | What stands on a DJ desk: the CDJ-3000, the mixer and the turntable. The Box has four players, two turntables and a mixer; The Baby Box, The Loft and The 103 have two players and a mixer. |
+| `booth-gear.ts` | Puts the kit's DJ equipment on the four desks. The Box has four players, two turntables and a mixer; The Baby Box, The Loft and The 103 have two players and a mixer. |
 | `dress-arches.ts` | The Baby Box, Arch80, toilets, load-in. |
 | `dress-upstairs.ts` | The Lounge, the green room, The Loft. |
 
@@ -346,13 +468,13 @@ Other settings, all environment variables: `CHROME` is the browser to start if i
 
 1. Make `src/venues/<id>/` with `plan.ts`, `copy.ts`, `surroundings.ts`, `build.ts`, `osm.json` and `index.ts`, following `types.ts`.
 2. Get the map data: `node tools/fetch-osm.mjs <lat> <lon> <radius in metres> src/venues/<id>/osm.json`. It asks the Overpass API, trying several mirrors with a growing wait between attempts, and converts the answer to metres around the given point.
-3. Start `build.ts` with `buildBlockout(ctx)` from `engine/blockout.ts`. That draws the plan as plain blocks, which is enough to walk it and check it against the sources. Dress it afterwards.
+3. Start `build.ts` with `buildBlockout(ctx)` from `engine/blockout.ts`. That draws the plan as plain blocks, which is enough to walk it and check it against the sources. Then fit it out from the kit (see `venues/flex/build.ts`) and dress it afterwards.
 4. Add it to `src/venues/index.ts`.
 5. Open `/?venue=<id>`.
 
 ## Ministry of Sound: coordinates and what is guessed
 
-`venues/mos/` is a model of 103 Gaunt Street, London SE1, built from the research in the project's `docs/ministry-of-sound-research.md`. Rooms, doors, stairs and fittings are in the right places and at the right sizes as far as the sources go, and each room is dressed from the photographs the research describes.
+`venues/mos/` is a model of 103 Gaunt Street, London SE1, built from research into the building (plans, licensing drawings, photographs). Rooms, doors, stairs and fittings are in the right places and at the right sizes as far as the sources go, and each room is dressed from the photographs the research describes.
 
 All lengths are metres, y is up.
 
@@ -369,6 +491,22 @@ All lengths are metres, y is up.
 **Times of day.** `night` (Saturday, 01:30, with the queue and the crowds) and `day` (empty).
 
 Not affiliated with Ministry of Sound. The name and the crest are the club's and are used only to identify the building.
+
+## Flex: coordinates and what is guessed
+
+`venues/flex/` is a first pass at Flex, Augartenbrücke 1, Vienna, built from `docs/flex-research.md`. That file marks every fact as sourced or guessed, and `plan.ts` keeps the same split in `MEASURED` and `GUESS`.
+
+**Frame.** The origin is the north-west end of the club's frontage on the quay wall. x runs along the wall downstream, toward the stage; z is negative toward the Donaukanal and positive inland, under the road. y is up from the street, so the quay is at about -6.5 and the water below that.
+
+**Sunken ground.** The canal and its quays lie below the street. The plan says so with `outdoors.cut` (ground that is not there) and `outdoors.decks` (the bridge across it): the city leaves the cut alone, nobody walks off the street into it, and the venue draws the quays, the walls and the water. The way down is a stair from `outside`.
+
+**Measured.** From the club's own technical drawings: the stage (1.02 m high, 5.7 m wide), the speaker columns 4.88 m apart, the mixing desk 7.86 m from the stage, the 5 by 3 m LED wall, the 19 by 8 grid of spots.
+
+**Guessed.** The length and height of the hall, the height of the street above the quay, where the door, the cashier and the bars are, and how the café and the hall lie against each other.
+
+**Who is playing.** The booth in the hall is a homage to Electric Indigo. The figure is the same figure as everyone else, and the techno is synthesised, not hers.
+
+Not affiliated with Flex or with Electric Indigo.
 
 ## Berghain: coordinates and measurements
 
@@ -403,7 +541,7 @@ Not affiliated with Berghain.
 
 - Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, under the Open Database License. Keep this credit visible wherever a venue's `osm.json` or anything derived from it is shown.
 - Rendering: [Three.js](https://threejs.org/) r186.
-- The booth on Berghain's main floor is a homage to Jeff Mills. The DJ figure depicts nobody in particular.
+- The booth on Berghain's main floor is a homage to Jeff Mills, and the booth in Flex's hall to Electric Indigo. The DJ figures depict nobody in particular.
 
 ## License
 
@@ -414,3 +552,5 @@ You can use, adapt, and share the material for noncommercial purposes. When shar
 Suggested credit: [Built with Club Kit by Nader Cserny](https://github.com/ncserny/clubkit).
 
 For promotional or other commercial use, contact [Nader Cserny](https://github.com/ncserny) for permission.
+
+**Not covered by the license:** `src/venues/mos/crest.png` is Ministry of Sound's own artwork, used only to identify the building, and the names of the clubs and artists are theirs. Map data in each venue's `osm.json` is © OpenStreetMap contributors under the Open Database License.

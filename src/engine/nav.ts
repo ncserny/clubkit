@@ -165,7 +165,13 @@ export interface Nav {
   zones(): Zone[];
 }
 
-export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], more: Obstacle[] = []): Nav {
+/** Sunken ground in world coordinates: where there is none, and the decks that bridge it. */
+export interface Sunken {
+  cut: Pt[][];
+  decks: Pt[][];
+}
+
+export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], more: Obstacle[] = [], sunken: Sunken = { cut: [], decks: [] }): Nav {
   /* ------------------------------------------------------- surfaces ---- */
   const surfaces: Surface[] = [];
   const flat = (y: number) => () => y;
@@ -210,8 +216,14 @@ export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], 
     if (b) blocks.push(b);
   }
 
+  const cut = sunken.cut.map((p) => ({ p, box: bounds(p) }));
+  const decks = sunken.decks.map((p) => ({ p, box: bounds(p) }));
+  const within = (list: { p: Pt[]; box: [number, number, number, number] }[], x: number, z: number) => list.some((c) => x >= c.box[0] && x <= c.box[2] && z >= c.box[1] && z <= c.box[3] && pointInPolygon(x, z, c.p));
+
   /** Open ground at a world point for someone whose feet are at `ref`: its height, or null where something solid stands. */
   function groundAt(wx: number, wz: number, lx: number, lz: number, ref: number): number | null {
+    // over a cut there is no ground to stand on; someone flying above the street may cross it
+    if (cut.length && ref <= STEP && within(cut, wx, wz) && !within(decks, wx, wz)) return null;
     let y = 0;
     for (const s of solids) {
       if (wx < s.box[0] || wx > s.box[2] || wz < s.box[1] || wz > s.box[3]) continue;

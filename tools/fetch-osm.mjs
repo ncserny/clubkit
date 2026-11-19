@@ -34,6 +34,10 @@ const query = `[out:json][timeout:120];
   way["leisure"~"^(park|garden|playground|pitch)$"]${around};
   way["barrier"~"^(fence|wall)$"]${around};
   node["entrance"]${around};
+  way["natural"="water"]${around};
+  way["waterway"="riverbank"]${around};
+  relation["natural"="water"]${around};
+  way["man_made"="bridge"]${around};
 );
 out body geom;`;
 
@@ -44,7 +48,7 @@ async function ask(url) {
     const r = await fetch(url, {
       method: 'POST',
       body: new URLSearchParams({ data: query }),
-      headers: { 'User-Agent': 'club-3d map fetch (one-off, per venue)', Accept: 'application/json' },
+      headers: { 'User-Agent': 'clubkit map fetch (one-off, per venue)', Accept: 'application/json' },
       signal: ctrl.signal,
     });
     const text = await r.text();
@@ -122,6 +126,15 @@ for (const e of raw.elements) {
     continue;
   }
   if (e.type === 'relation') {
+    if (t.natural === 'water') {
+      // a river or a canal is drawn from its outer rings
+      for (const m of e.members ?? []) {
+        if (m.type !== 'way' || m.role !== 'outer' || !m.geometry) continue;
+        const p = ring(m.geometry);
+        if (p.length > 2) map.areas.push({ kind: 'water', p });
+      }
+      continue;
+    }
     if (!t.building) continue;
     for (const m of e.members ?? []) {
       if (m.type !== 'way' || m.role !== 'outer' || !m.geometry) continue;
@@ -142,11 +155,18 @@ for (const e of raw.elements) {
     const w = metres(t.width) ?? (lanes ? lanes * 3.2 + 0.6 : t.oneway === 'yes' && ['trunk', 'primary', 'secondary', 'tertiary'].includes(k) ? 8 : null);
     const road = { id: e.id, kind: k, name: t.name ?? null, surface: t.surface ?? null, p };
     if (w) road.w = round(w);
+    if (t.bridge && t.bridge !== 'no') road.bridge = true;
     if (p.length > 1) map.roads.push(road);
   } else if (['rail', 'light_rail', 'tram'].includes(t.railway)) {
     if (underground(t)) continue;
     const p = line(e.geometry);
     if (p.length > 1) map.rails.push({ id: e.id, kind: t.railway, service: t.service ?? null, bridge: !!t.bridge && t.bridge !== 'no', embankment: t.embankment === 'yes', p });
+  } else if (t.natural === 'water' || t.waterway === 'riverbank') {
+    const p = ring(e.geometry);
+    if (p.length > 2) map.areas.push({ kind: 'water', p });
+  } else if (t.man_made === 'bridge') {
+    const p = ring(e.geometry);
+    if (p.length > 2) map.areas.push({ kind: 'bridge', p });
   } else if (t.landuse || t.leisure) {
     const p = ring(e.geometry);
     if (p.length > 2) map.areas.push({ kind: t.landuse ?? t.leisure, p });

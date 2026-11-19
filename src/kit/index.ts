@@ -10,6 +10,7 @@
  *   People          dancers, talkers, bouncer, doorStaff, dj, queue, group, person, WARDROBE
  *   Structure       railing, trussLeg, trussRun, openStair, openLeaves, barrierLine
  *   Furniture       barCounter, sofa, bottles
+ *   Finishes        graffitiWall, makeMats
  *   Shapes          box, along, cyl, tube, panel, quad4, at, placed, rnd
  */
 export { makeStages, type Animate, type Beam, type Stage, type Stages } from './stage';
@@ -21,3 +22,4 @@ export { speakerCabinet, speakerStack } from './sound';
 export { bouncer, dancers, dj, doorStaff, group, person, queue, talkers, WARDROBE } from './people';
 export { barrierLine, openLeaves, openStair, railing, trussLeg, trussRun } from './structure';
 export { barCounter, bottles, sofa, type Side } from './furniture';
+export { graffitiWall } from './graffiti';

@@ -7,6 +7,7 @@ import type { VenueModule } from '../engine/types';
 export const venues: Record<string, () => Promise<VenueModule>> = {
   mos: () => import('./mos').then((m) => m.venue),
   berghain: () => import('./berghain').then((m) => m.venue),
+  flex: () => import('./flex').then((m) => m.venue),
 };
 
 export const DEFAULT_VENUE = 'mos';
