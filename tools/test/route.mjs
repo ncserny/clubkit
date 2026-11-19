@@ -8,7 +8,9 @@
 // The route file, all in the venue's own coordinates (x, z on the floor; `feet` is the floor height to start from):
 //   { "walks":   [{ "name": "in from the street", "start": [x, z, feet], "to": [[x, z], [x, z, "the door"]] }],
 //     "blocked": [{ "name": "the quay edge", "from": [x, z, feet], "to": [x, z] }] }
-// A walk passes when every waypoint is reached; a `blocked` entry passes when the walker is stopped short of `to`.
+//     "grounded": [{ "name": "scrolling at the wall", "from": [x, z, feet], "toward": [x, z], "pitch": 0.35 }] }
+// A walk passes when every waypoint is reached; a `blocked` entry passes when the walker is stopped short of `to`;
+// a `grounded` entry passes when scrolling the wheel toward a point, looking up by `pitch`, leaves the feet on the floor.
 import { readFileSync } from 'node:fs';
 
 const BASE = process.env.BASE ?? 'http://127.0.0.1:5173/';
@@ -42,7 +44,17 @@ const run = `((route) => {
     }
     return legs;
   };
+  // Scroll the wheel forward sixty times, looking up, as someone does who walks with a trackpad.
+  const scroll = (g) => {
+    const [x, z] = W(g.from[0], g.from[1]), [tx, tz] = W(g.toward[0], g.toward[1]);
+    c.pose(x, g.from[2] + 1.7, z, Math.atan2(-(tx - x), -(tz - z)), g.pitch ?? 0.35);
+    const canvas = document.getElementById('cw-canvas');
+    for (let i = 0; i < 60; i++) canvas.dispatchEvent(new WheelEvent('wheel', { deltaY: -100, bubbles: true, cancelable: true }));
+    const w = c.where();
+    return { name: g.name, feet: +(w[1] - 1.7).toFixed(2), floor: c.floor(w), zone: c.zone() };
+  };
   return {
+    grounded: (route.grounded ?? []).map(scroll),
     walks: (route.walks ?? []).map((w) => ({ name: w.name, legs: walk(w.start, w.to) })),
     blocked: (route.blocked ?? []).map((b) => ({ name: b.name, ...walk(b.from, [b.to])[0] })),
   };
@@ -64,6 +76,11 @@ export default async (page) => {
     const ok = b.short > 0.5;
     if (!ok) failed++;
     console.log(`${ok ? 'PASS' : 'FAIL'} ${b.name}: ${ok ? `stopped ${b.short} m short` : 'walked straight through'} at ${JSON.stringify(b.at)} in ${b.zone}`);
+  }
+  for (const g of result.grounded) {
+    const ok = g.floor !== null && Math.abs(g.feet - g.floor) < 0.05;
+    if (!ok) failed++;
+    console.log(`${ok ? 'PASS' : 'FAIL'} ${g.name}: feet at ${g.feet}, floor at ${g.floor}, in ${g.zone}`);
   }
   const errors = page.console.filter((m) => m.type === 'exception' || m.type === 'error');
   if (errors.length) {
