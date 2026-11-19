@@ -48,6 +48,16 @@
       <h2 id="cw-about-heading"></h2>
       <div id="cw-about-body"></div>
     </section>
+    <!-- Shown when the address names no venue: one card per venue, filled in from src/venues/index.ts. -->
+    <section id="cw-choose" class="cw-choose" aria-labelledby="cw-choose-title">
+      <p class="cw-kicker">Virtual tours, built in code</p>
+      <h2 id="cw-choose-title">Clubs Worldwide</h2>
+      <!-- the build writes the cards in here, so the page reads without JavaScript -->
+      <div id="cw-choose-list" class="cw-choose-list"></div>
+      <p class="cw-choose-note">Walkable models, built in code. Nothing is downloaded as a model.</p>
+      <a id="cw-site" class="cw-site" hidden></a>
+      <p class="cw-choose-source">Open source. <a href="https://github.com/ncserny/clubkit" rel="noopener">Build your own club experience with Club Kit</a></p>
+    </section>
     </main>
 
     <button type="button" id="cw-detail" class="cw-detail" hidden>Detail</button>
@@ -68,15 +78,6 @@
       <div id="cw-info-body"></div>
       <p class="cw-info-foot" id="cw-info-foot"></p>
     </dialog>
-
-    <!-- Shown when the address names no venue: one card per venue, filled in from src/venues/index.ts. -->
-    <section id="cw-choose" class="cw-choose" aria-labelledby="cw-choose-title">
-      <p class="cw-kicker">Virtual tours, built in code</p>
-      <h2 id="cw-choose-title">Clubs Worldwide</h2>
-      <nav id="cw-choose-list" class="cw-choose-list" aria-label="Venues"></nav>
-      <p class="cw-choose-note">Walkable models, built in code. Nothing is downloaded as a model.</p>
-      <p class="cw-choose-source">Open source. <a href="https://github.com/ncserny/clubkit" rel="noopener">Build your own club experience with Club Kit</a></p>
-    </section>
 
     <div class="cw-fallback">
       <h2 id="cw-fallback-title">This 3D model needs WebGL</h2>

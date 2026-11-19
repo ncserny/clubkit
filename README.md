@@ -29,6 +29,16 @@ Then open the address Vite prints (normally http://localhost:5173). `npm run dev
 
 `npm run build` writes a static site to `dist/`: the chooser at its root and a folder per venue. It uses relative paths, so it can be served from any folder; put it at `/projects/clubs/` and Flex is at `/projects/clubs/flex/`. `npm run typecheck` runs TypeScript.
 
+To put the built site on a site of your own, tell the build where it will live. All four are optional:
+
+| Variable | Example | What it does |
+|---|---|---|
+| `SITE_URL` | `https://example.com/clubs/` | Adds a canonical link and `og:url` to the start page and to every venue's page |
+| `SHARE_IMAGE` | `https://example.com/clubs/share.jpg` | The image for link previews (`og:image`, 1200 by 630) |
+| `VITE_SITE_NAME` | `example.com` | With `VITE_SITE_HOME`, a small link back to your site on the start page |
+| `VITE_SITE_HOME` | `/` | Where that link goes |
+
+
 ## Controls
 
 | Input | Action |
@@ -201,6 +211,8 @@ Other settings, all environment variables: `CHROME` is the browser to start if i
 
 ## Adding a venue
 
+To contribute a club to this repository, read [CONTRIBUTING.md](CONTRIBUTING.md): changes come in by pull request.
+
 If an AI agent is doing the work, point it at `.claude/skills/build-a-club/SKILL.md`: the order to work in, which component to use for what, what makes a room look real, and how to check it. Claude Code picks the skill up by itself.
 
 
@@ -224,7 +236,7 @@ All lengths are metres, y is up.
 
 **What is left out.** Sponsors' branding on the bars, the Ministry Venues "M", and the makers' names on the DJ equipment. Posters and flyers on the walls are invented patterns, not real artwork.
 
-**The crest.** `crest.png` is the club's own artwork, taken from the logo file on ministryofsound.com, scaled down and cropped to its bounds, with nothing redrawn. It appears where it does on the building: tone on tone on the roller shutter in the courtyard, projected on the neighbour's brick flank at night, and small at the foot of the sound-level warning sign in a Box tunnel. There is no sign on the street front, because the building has none.
+**The crest.** `crest.webp` is the club's own artwork, taken from the logo file on ministryofsound.com, scaled down and cropped to its bounds, with nothing redrawn. It appears where it does on the building: tone on tone on the roller shutter in the courtyard, projected on the neighbour's brick flank at night, and small at the foot of the sound-level warning sign in a Box tunnel. There is no sign on the street front, because the building has none.
 
 **Times of day.** `night` (Saturday, 01:30, with the queue and the crowds) and `day` (empty).
 
@@ -294,4 +306,4 @@ Suggested credit: [Built with Club Kit by Nader Cserny](https://github.com/ncser
 
 For promotional or other commercial use, contact [Nader Cserny](https://github.com/ncserny) for permission.
 
-**Not covered by the license:** `src/venues/mos/crest.png` is Ministry of Sound's own artwork and `src/venues/flex/logo.svg` is Flex's own logo; both are used only to identify the buildings. The names of the clubs and artists are theirs. Map data in each venue's `osm.json` is © OpenStreetMap contributors under the Open Database License.
+**Not covered by the license:** `src/venues/mos/crest.webp` is Ministry of Sound's own artwork and `src/venues/flex/logo.svg` is Flex's own logo; both are used only to identify the buildings. The names of the clubs and artists are theirs. Map data in each venue's `osm.json` is © OpenStreetMap contributors under the Open Database License.

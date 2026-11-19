@@ -4,7 +4,7 @@ import { pointInPolygon } from '../../engine/geom';
 import type { BuildContext, Pt, VenueHooks } from '../../engine/types';
 import { canvasTexture } from '../../engine/util';
 import { buildVisibility } from '../../engine/visibility';
-import crestUrl from './crest.png';
+import crestUrl from './crest.webp';
 import { dressArches } from './dress-arches';
 import { dressBox } from './dress-box';
 import { dressCourtyard, dressStreet } from './dress-exterior';
