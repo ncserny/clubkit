@@ -14,6 +14,23 @@ It comes in three layers:
 | Berghain, Berlin | `berghain` | Fully dressed |
 | Flex, Vienna | `flex` | Dressed: fitted out from the kit, surfaces painted from the club's photographs of its empty rooms |
 
+## What it looks like
+
+[![Berghain in 3D: a walk through the model on YouTube](https://img.youtube.com/vi/VYSnKsIEao8/maxresdefault.jpg)](https://www.youtube.com/watch?v=VYSnKsIEao8)
+
+*A walk through Berghain, from the queue to the main floor ([watch on YouTube](https://www.youtube.com/watch?v=VYSnKsIEao8)).*
+
+| Berghain, Berlin | |
+|---|---|
+| ![The queue at Berghain at night, between crowd barriers on the gravel forecourt](docs/screenshots/berghain-queue.webp) | ![Berghain's main floor in red light, the crowd in front of the booth](docs/screenshots/berghain-main.webp) |
+| **Ministry of Sound, London** | |
+| ![The courtyard at Ministry of Sound: the truss lane, hedges, and the door](docs/screenshots/mos-courtyard.webp) | ![The Box at Ministry of Sound under its grid of blue light](docs/screenshots/mos-box.webp) |
+| **Flex, Vienna** | |
+| ![The door of Flex on the Donaukanal at night, with the queue and the sign in bulbs](docs/screenshots/flex-door.webp) | ![The dance floor at Flex: the stage, the ring of truss and moving beams](docs/screenshots/flex-floor.webp) |
+| ![Flex Café by day: the bar on its raised side, the winding steps edged in red, the sofas](docs/screenshots/flex-cafe.webp) | |
+
+Every picture is a screenshot of the running model; nothing in it is a photograph.
+
 There are no model files. Every shape and texture is generated in code when the page loads. Each venue brings one data file, its surroundings from OpenStreetMap.
 
 ## Run it
