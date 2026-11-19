@@ -93,12 +93,24 @@ export function build(ctx: BuildContext): VenueHooks {
   o.add(paving, groundPolygon(strip(LEFT_EDGE, LEFT_WALL), Q - 0.02));
   o.add(water, groundPolygon(strip(RIGHT_EDGE, LEFT_EDGE), WATER));
   for (const edge of [RIGHT_EDGE, LEFT_EDGE]) for (let i = 0; i < edge.length - 1; i++) o.add(stone, K.panel(edge[i], edge[i + 1], WATER - 1, Q - 0.02, true));
-  // the quay walls up to the street, with a parapet; sprayed as high as a ladder reaches near the club
+  // the quay walls up to the street, with a parapet; sprayed from end to end near the club
+  // Behind the pavilion the wall is the building's own (the rooms draw it, with their doorways),
+  // so there it is drawn only above the pavilion's roof: a whole sheet would shut the way from
+  // the foyer and the café into the hall.
+  const behind: [number, number] = [FOYER.x0 - 0.3, SHED.x1 + 0.3];
+  const roofLine = Q + GUESS.cafeHeight + 0.35;
   [RIGHT_WALL, LEFT_WALL].forEach((wall, side) => {
     for (let i = 0; i < wall.length - 1; i++) {
       const [a, b] = [wall[i], wall[i + 1]];
       const near = Math.abs(a[0]) <= 145 && Math.abs(b[0]) <= 145;
-      o.add(near ? sprayed[(i + side) % sprayed.length] : stone, K.panel(a, b, Q - 0.02, 0, true));
+      const finish = near ? sprayed[(i + side) % sprayed.length] : stone;
+      const along = side === 0 && a[1] === 0 && b[1] === 0 && a[0] < behind[1] && b[0] > behind[0];
+      if (along) {
+        // the wall in three pieces: before the pavilion, over it, after it
+        if (a[0] < behind[0]) o.add(finish, K.panel(a, [behind[0], 0], Q - 0.02, 0, true));
+        o.add(finish, K.panel([Math.max(a[0], behind[0]), 0], [Math.min(b[0], behind[1]), 0], roofLine, 0, true));
+        if (b[0] > behind[1]) o.add(finish, K.panel([behind[1], 0], b, Q - 0.02, 0, true));
+      } else o.add(finish, K.panel(a, b, Q - 0.02, 0, true));
       o.add(stone, K.along(a, b, 0.45, 0, 1.05));
     }
   });
@@ -517,6 +529,13 @@ export function build(ctx: BuildContext): VenueHooks {
 
   /* =============================================================== foyer ==== */
   const foyer = stages.stage(room('foyer'));
+  // the way on: a red sign over each doorway, as the club's own signs are, and the hall's opening lit
+  const overDoor = (map: THREE.Texture, a: Pt, b: Pt) => room('foyer').add(new THREE.Mesh(K.panel(a, b, Q + GUESS.doorHeight + 0.08, Q + GUESS.doorHeight + 0.08 + (Math.hypot(b[0] - a[0], b[1] - a[1]) * 96) / 512), new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide, toneMapped: false })));
+  // the word over the door it names; each panel runs so that it reads the right way from the foyer
+  overDoor(ticker('HALLE'), [6.0, FOYER.z1 - 0.02], [3.0, FOYER.z1 - 0.02]);
+  overDoor(ticker('CAF\u00c9'), [FOYER.x1 - 0.02, -5.4], [FOYER.x1 - 0.02, -2.6]);
+  // a red glow on the floor of the passage through the wall, to draw the eye to it
+  foyer.batch.add(mats.glow('#ff2a1c'), K.box(3.25, FOYER.z1 - 0.28, 5.75, FOYER.z1 - 0.25, Q + GUESS.doorHeight - 0.03, Q + GUESS.doorHeight));
   foyer.batch.add(black, K.box(FOYER.x0, -3.2, FOYER.x0 + 1.0, -1, Q, Q + 1.1));
   foyer.batch.add(mats.glow('#ffe9c8'), K.box(FOYER.x0 + 0.2, -2.6, FOYER.x0 + 0.8, -1.6, Q + 1.1, Q + 1.12));
 
