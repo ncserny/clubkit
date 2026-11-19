@@ -22,7 +22,9 @@ function choose() {
       ['cw-choose-city', v.city],
       ['cw-choose-name', v.name],
       ['cw-choose-text', v.text],
+      ['cw-choose-by', v.by ? `Model by ${v.by}` : ''],
     ]) {
+      if (!text) continue;
       const span = document.createElement('span');
       span.className = cls;
       span.textContent = text;
@@ -30,7 +32,7 @@ function choose() {
     }
     list.append(a);
   }
-  document.title = 'Club Kit: choose a club';
+  document.title = 'Clubs Worldwide: choose a club';
   document.documentElement.dataset.cwState = 'choose';
 }
 

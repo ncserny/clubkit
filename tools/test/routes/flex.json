@@ -1,0 +1,25 @@
+{
+  "walks": [
+    {
+      "name": "from the street to the toilets",
+      "start": [-64, -9, 0],
+      "to": [[-44, -9, "foot of the steps"], [-20, -18, "the quay"], [4.6, -12, "before the door"], [4.6, -8, "the door"], [4.6, -4, "the foyer"], [4.6, 3, "into the hall"], [4.6, 8, "the dance strip"], [25, 8, "down the floor"], [31.6, 6.6, "the steps to the raised side"], [31.6, 4, "the raised side"], [39, 2, "beside the stage"], [39, 0.2, "through the quay wall"], [39, -2, "the toilets"]]
+    },
+    {
+      "name": "through the café into the hall",
+      "start": [4.6, -4, -6.5],
+      "to": [[9.5, -4, "the café"], [15.5, -5.4, "foot of the winding steps"], [15.5, -6.8, "the raised side"], [22, -6.8, "along the bar"], [22, -5.5, "down again"], [24, -3, "across the floor"], [24, -1.2, "the door to the hall"], [24, 0.2, "through the wall"], [24, 3, "the hall"]]
+    },
+    { "name": "from the raised side onto the stage", "start": [36, 4, -6.05], "to": [[38.5, 4.5], [39, 8, "the stage"]] },
+    { "name": "back up to the street", "start": [-44, -9, -6.5], "to": [[-62, -9, "top of the steps"], [-64, -4, "the street"]] }
+  ],
+  "blocked": [
+    { "name": "the quay edge", "from": [0, -15, -6.5], "to": [0, -25] },
+    { "name": "the street parapet above the quay", "from": [30, 4, 0], "to": [30, -10] },
+    { "name": "the front of the stage", "from": [34, 8, -6.5], "to": [38.5, 8] },
+    { "name": "the rail on the raised side", "from": [35, 4, -6.05], "to": [35, 7] },
+    { "name": "the café bar", "from": [18, -6.8, -6.05], "to": [18, -9] },
+    { "name": "a sofa", "from": [15.7, -3.8, -6.5], "to": [13, -3.8] },
+    { "name": "the far bank's edge", "from": [60, -86, -6.5], "to": [60, -70] }
+  ]
+}

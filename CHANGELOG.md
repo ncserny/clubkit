@@ -6,12 +6,15 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Added
 
-- **Start page.** Opening the page without `?venue=` now lists the clubs to choose from: Berghain (Berlin), Ministry of Sound (London) and Flex (Vienna). Each card is a link, so a choice can be shared. A build made with `VITE_VENUE` still opens that venue directly.
+- **Start page, "Clubs Worldwide".** Opening the page without `?venue=` now lists the clubs to choose from: Berghain (Berlin), Ministry of Sound (London) and Flex (Vienna). Each card is a link, so a choice can be shared. A build made with `VITE_VENUE` still opens that venue directly.
 - **Flex: the hall's bar.** The steel bar on the left of the hall, on its plinth, with crates lit blue behind it and the COCKTAILS sign in red letters and bulbs above.
 - **Flex: the café, from photographs.** The bar now stands on a raised side along the canal, behind three winding concrete steps edged in red light, with red stools and blue crates. Red and black leather sofas on castors, a silver duct along the inner wall with its branch to the floor, strips of tube light on the red ceiling, and a plywood deck on scissor legs with old par cans, LED bars and the glass doors beside it.
 - **Flex: outside.** The club's own logo over the door as a sign set with bulbs, an EINTRITT ticker beside the door, a railing along the water's edge, the quay walls sprayed from the quay to the street, and a wall of painted heads along the garden (invented, in the spirit of the boards that stood there).
 - **Flex: toilets, cloakroom, seating.** Toilets with the wall of sweets, a cloakroom counter with coats, people sitting on the café's sofas, at its bar and at the picnic tables in the garden.
 - **Kit:** `tree`, `bollard`, `lampPost`, `stool`, and `prism` (a slab over any outline, for curved steps and counters that are not square).
+- **Start page: who made each model.** A card names the model's maker where there is one, and under the cards a line links to this repository: "Open source. Build your own club experience with Club Kit".
+- **A skill for building a club**, shared by every agent that works here: `.claude/skills/build-a-club/SKILL.md`, linked from `AGENTS.md` and `CLAUDE.md`. It gives the order to work in, the kit component for each job, what makes a room look real, and how to check the result.
+- **A walk test for any venue:** `tools/test/route.mjs` walks the routes in a JSON file and checks that what should stop a walker does. `tools/test/routes/flex.json` is Flex's.
 - `AGENTS.md`, with the rules for working in this repository, and this changelog.
 
 ### Changed

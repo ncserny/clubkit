@@ -2,6 +2,10 @@
 
 A framework (`src/engine/`), a components library (`src/kit/`) and venues (`src/venues/<id>/`) for walkable 3D clubs in the browser. The README explains each layer.
 
+## Building or dressing a club
+
+Follow `.claude/skills/build-a-club/SKILL.md`. It is a plain Markdown file, written for any agent: the order to work in, which kit component to reach for, what makes a room look real, and how to check it. Use the most capable model available (the venues here were built with Claude Fable 5.2); the work is reading photographs and reasoning about space, and smaller models get rooms the wrong way round.
+
 ## Changelog
 
 **Every change updates `CHANGELOG.md` in the same commit.** It follows Keep a Changelog: newest first, grouped under Added, Changed, Fixed and Removed, written for someone who uses the repository, not as a list of commits. Say which layer a change is in: the engine, the kit, or a named venue.

@@ -195,10 +195,14 @@ Other settings, all environment variables: `CHROME` is the browser to start if i
 | `node tools/test/cdp.mjs tools/test/moswalk.mjs` | Ministry of Sound: walks from the Gaunt Street pavement to the dance floor of The Box with the real keys, then collision against walls and fittings (gates, truss legs, counters, booths, rails, benches, the gantry steps, the Lounge tiers, the Loft alcove), the stairs to the Lounge, the ten viewpoints, the time of day, Q and E, the strobe. Saves screenshots to `OUT`. |
 | `SHOTS=tools/test/shots-in.json node tools/test/cdp.mjs tools/test/scout.mjs` | Takes a screenshot from each position in a list, for looking at dressing. `shots-ext.json` and `shots-in.json` are the lists used for Ministry of Sound; `shots-cull.json` looks round from 37 places for the culling check. |
 | `node tools/test/cdp.mjs tools/test/measure.mjs` | Draw calls and triangles at each viewpoint, and texture memory, on the detail level in `DETAIL`. `heaviest.mjs` lists what the triangles are; `vis.mjs` lists the rooms drawn from each viewpoint. |
+| `VENUE=flex ROUTE=tools/test/routes/flex.json node tools/test/cdp.mjs tools/test/route.mjs` | Any venue: walks the routes in a JSON file through the collision code, and checks that the things listed as `blocked` stop a walker. |
 | `node tools/test/cdp.mjs tools/test/navtest.mjs` | Berghain: the same kind of walk and collision checks, and the keyboard fixes. |
 | `node tools/test/cdp.mjs tools/test/render.mjs`, then `node tools/test/compare.mjs dirA dirB` | Renders every viewpoint of a venue three times and compares two sets pixel by pixel, to show that an engine change has not changed a venue. |
 
 ## Adding a venue
+
+If an AI agent is doing the work, point it at `.claude/skills/build-a-club/SKILL.md`: the order to work in, which component to use for what, what makes a room look real, and how to check it. Claude Code picks the skill up by itself.
+
 
 1. Make `src/venues/<id>/` with `plan.ts`, `copy.ts`, `surroundings.ts`, `build.ts`, `osm.json` and `index.ts`, following `types.ts`.
 2. Get the map data: `node tools/fetch-osm.mjs <lat> <lon> <radius in metres> src/venues/<id>/osm.json`. It asks the Overpass API, trying several mirrors with a growing wait between attempts, and converts the answer to metres around the given point.

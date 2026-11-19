@@ -509,6 +509,21 @@ html[data-cw-state='choose'] :is(.cw-bar, #cw-intro, .cw-caption, .cw-views, .cw
   line-height: 1.5;
   color: var(--cw-muted);
 }
+.cw-choose-by {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.72rem;
+  color: rgba(236, 235, 232, 0.5);
+}
+.cw-choose-source {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--cw-muted);
+}
+.cw-choose-source a {
+  color: var(--cw-ink);
+  text-underline-offset: 0.2em;
+}
 .cw-choose-note {
   margin: 0.4rem 0 0;
   font-size: 0.72rem;
