@@ -28,6 +28,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Fixed
 
+- The README no longer carries a stale second copy of itself below the credits.
 - **Engine:** in a room sunk below the street, the street's ground no longer held a walker up or lifted them to street level while they crossed a thick wall.
 - **Engine:** a doorway through a thick wall now counts as part of the room it leads into, so light and sound no longer flick to "outdoors" in the doorway.
 
