@@ -150,7 +150,7 @@ export async function start(venue: VenueModule) {
    * slowly about, then flies on, round and round until the visitor takes over. `left` is the
    * time still to stay; it counts only once the flight there has landed.
    */
-  let tour: { index: number; left: number; yaw: number; since: number } | null = null;
+  let tour: { index: number; left: number; stay: number; yaw: number; since: number } | null = null;
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function aim(target: THREE.Vector3, from: THREE.Vector3) {
@@ -431,9 +431,9 @@ export async function start(venue: VenueModule) {
     const at = world.viewpoints.indexOf(current);
     const index = begun && at >= 0 ? (at + 1) % world.viewpoints.length : 0;
     begin();
-    tour = { index, left: 0, yaw: 0, since: 0 };
+    tour = { index, left: 0, stay: 0, yaw: 0, since: 0 };
     goTo(world.viewpoints[index]);
-    tour.left = dwell(world.viewpoints[index]);
+    tour.left = tour.stay = dwell(world.viewpoints[index]);
     tour.yaw = yaw;
     showTour();
   }
@@ -454,15 +454,18 @@ export async function start(venue: VenueModule) {
     }
     if (tour.since === 0) tour.yaw = yaw;
     tour.since += dt;
-    // a slow look to one side and back, as someone standing there would
-    if (!still) yaw = tour.yaw + 0.22 * Math.sin((tour.since / tour.left) * Math.PI * 2) * Math.min(1, tour.since / 1.5);
+    // One slow turn of the head to one side and back over the whole stay, starting and ending
+    // at rest, so that the flight on begins from where the view settled. It is measured
+    // against the whole stay, not what is left of it: that shrinks, and the turn would speed
+    // up into a shake toward the end.
+    if (!still) yaw = tour.yaw + 0.12 * (1 - Math.cos(Math.min(1, tour.since / tour.stay) * Math.PI * 2)) * 0.5;
     tour.left -= dt;
     if (tour.left > 0) return;
     yaw = tour.yaw;
     tour.index = (tour.index + 1) % world.viewpoints.length;
     const next = world.viewpoints[tour.index];
     goTo(next);
-    tour.left = dwell(next);
+    tour.left = tour.stay = dwell(next);
     tour.since = 0;
   }
   // the label sits in a text node of its own, so that the ::before mark stays
