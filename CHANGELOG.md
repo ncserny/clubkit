@@ -44,6 +44,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Fixed
 
+- **Engine: the tour no longer shakes before it moves on.** The look about at each viewpoint was timed against the seconds left, which shrink, so it sped up into a shake at the end. It is now one slow turn of the head to one side and back over the whole stay, about seven degrees, starting and ending at rest.
 - **Flex: the way into the hall.** A sheet of sprayed wall stood in every doorway through the old quay wall, so from the foyer the way into the hall looked like a painted wall. The wall behind the pavilion is now drawn only above its roof, and the doorways are open. Over the foyer's two doorways hang red signs, HALLE and CAFÉ, and red light spills out of the passage into the hall.
 - **Engine: the wheel no longer lifts a walker into the air.** Out of doors, scrolling toward a building while looking up at it climbed without end once the wall stopped the walk, and left the visitor hovering high over the scene. Someone standing on the ground now walks with the wheel, indoors and out; only someone already in the air (Q, or a viewpoint above) climbs and dives with it. E no longer drops to street level where there is no floor underneath. The route test can check this (`grounded` entries), and Flex's does.
 - The README no longer carries a stale second copy of itself below the credits.
