@@ -32,7 +32,7 @@ function choose() {
     }
     list.append(a);
   }
-  document.title = 'Clubs Worldwide: choose a club';
+  // the title the page came with stays: it names the collection, and every venue sets its own
   document.documentElement.dataset.cwState = 'choose';
 }
 
