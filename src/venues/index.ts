@@ -16,7 +16,7 @@ export const venues: Record<string, () => Promise<VenueModule>> = {
  */
 export const catalogue: { id: string; name: string; city: string; text: string; by?: string }[] = [
   { id: 'berghain', name: 'Berghain', city: 'Berlin', text: 'The former power station in Friedrichshain: the queue, the door, the main floor and Panorama Bar.', by: 'Nader Cserny' },
-  { id: 'mos', name: 'Ministry of Sound', city: 'London', text: '103 Gaunt Street: courtyard, tunnel, The 103, The Box and the rooms upstairs.', by: 'Tim, Manchester' },
+  { id: 'mos', name: 'Ministry of Sound', city: 'London', text: '103 Gaunt Street: courtyard, tunnel, The 103, The Box and the rooms upstairs.', by: 'Tim Huckle' },
   { id: 'flex', name: 'Flex', city: 'Vienna', text: 'On the Donaukanal: down the steps from the bridge, through the café, into the hall under the road.', by: 'Nader Cserny' },
 ];
 
