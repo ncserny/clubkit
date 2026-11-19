@@ -12,7 +12,7 @@ export const copy: Copy = {
   kicker: 'The famous club, built in code',
   intro: 'The former Heizkraftwerk Friedrichshain, built in 1953, its gravel forecourt and the queue at the door. Inside: the cloakroom, the main floor in the old turbine hall and Panorama Bar upstairs.',
   start: 'Join the queue',
-  hintKeys: 'Drag to look · WASD to walk · 1 to 9 for viewpoints · L for Sunday morning',
+  hintKeys: 'Drag to look · WASD to walk · 1 to 9 for viewpoints · T for the tour · L for Sunday morning',
   hintTouch: 'Drag to look · the joystick walks · tap a viewpoint below',
   credit: `<a href="${ABOUT}" rel="noopener">About the project</a> · ${OSM}`,
   aboutHeading: 'About this model',

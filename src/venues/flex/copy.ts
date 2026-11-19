@@ -32,7 +32,7 @@ export const copy: Copy = {
   kicker: 'Vienna · on the Donaukanal since 1995',
   intro: 'A club in a disused stretch of U-Bahn gallery under the Franz-Josefs-Kai, known for its sound system. Tonight: Electric Indigo. Come down the steps from the Augartenbrücke, along the quay, through the café and into the hall.',
   start: 'Go down to the canal',
-  hintKeys: 'Drag to look · WASD to walk · 1 to 9 for viewpoints · L for daytime',
+  hintKeys: 'Drag to look · WASD to walk · 1 to 9 for viewpoints · T for the tour · L for daytime',
   hintTouch: 'Drag to look · the joystick walks · tap a viewpoint below',
   credit: OSM,
   aboutHeading: 'About this model',

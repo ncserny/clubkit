@@ -226,6 +226,35 @@ body {
   font-weight: 600;
   padding: 0.65rem 1.4rem;
 }
+.cw-starts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+#cw-tour-start {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--cw-rule);
+  background: transparent;
+  color: var(--cw-ink);
+  cursor: pointer;
+}
+#cw-tour-start:hover,
+#cw-tour-start:focus-visible {
+  border-color: var(--cw-ink);
+  outline: none;
+}
+#cw-tour[aria-pressed='true']::before {
+  content: '\25A0\00a0';
+  font-size: 0.7em;
+}
+#cw-tour[aria-pressed='false']::before {
+  content: '\25B6\00a0';
+  font-size: 0.7em;
+}
 .cw-hint {
   margin: 1rem 0 0;
   font-size: 0.72rem;
