@@ -145,6 +145,13 @@ export async function start(venue: VenueModule) {
   /** The zone the caption on screen was written for. */
   let captionZone = '';
   let flight: { from: THREE.Vector3; to: THREE.Vector3; yaw0: number; yaw1: number; pitch0: number; pitch1: number; t: number; dur: number; via?: THREE.Vector3 } | null = null;
+  /**
+   * The tour: it flies to each viewpoint in turn, stays while its words can be read, looking
+   * slowly about, then flies on, round and round until the visitor takes over. `left` is the
+   * time still to stay; it counts only once the flight there has landed.
+   */
+  let tour: { index: number; left: number; yaw: number; since: number } | null = null;
+  const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function aim(target: THREE.Vector3, from: THREE.Vector3) {
     const d = target.clone().sub(from);
@@ -239,14 +246,17 @@ export async function start(venue: VenueModule) {
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift', 'q', 'e'].includes(k)) {
       keys.add(k);
       flight = null;
+      stopTour();
       if (k.startsWith('arrow')) e.preventDefault();
     }
     // a digit and nothing else: Number(' ') is 0, and 0 can be a viewpoint's key
     const view = /^[0-9]$/.test(e.key) ? world.viewpoints[Number(e.key) - firstViewKey] : undefined;
     if (view) {
       begin();
+      stopTour();
       goTo(view);
     }
+    if (k === 't') toggleTour();
     if (k === 'm') toggleMute();
     if (k === 'l') toggleTime();
   });
@@ -274,7 +284,10 @@ export async function start(venue: VenueModule) {
     // the view follows the hand: drag up to look up, drag right to look right
     yaw -= dx * s;
     pitch = THREE.MathUtils.clamp(pitch - dy * s, -1.45, 1.45);
-    if (Math.abs(dx) + Math.abs(dy) > 1) flight = null;
+    if (Math.abs(dx) + Math.abs(dy) > 1) {
+      flight = null;
+      stopTour();
+    }
   });
   const endDrag = () => (dragging = false);
   canvas.addEventListener('pointerup', endDrag);
@@ -284,6 +297,7 @@ export async function start(venue: VenueModule) {
     (e) => {
       e.preventDefault();
       flight = null;
+      stopTour();
       const f = new THREE.Vector3(0, 0, -1).applyEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
       const z = nav.zoneAt(pos);
       const next = pos.clone().addScaledVector(f, -e.deltaY * (z.inside ? 0.01 : 0.06));
@@ -318,6 +332,7 @@ export async function start(venue: VenueModule) {
       moveJoy(e);
       begin();
       flight = null;
+      stopTour();
     });
     const moveJoy = (e: PointerEvent) => {
       if (e.pointerId !== joyId) return;
@@ -355,6 +370,7 @@ export async function start(venue: VenueModule) {
         b.append(num, document.createTextNode(v.label));
         b.addEventListener('click', () => {
           begin();
+          stopTour();
           goTo(v);
         });
         return b;
@@ -400,6 +416,60 @@ export async function start(venue: VenueModule) {
     $('cw-intro')?.setAttribute('hidden', '');
     root.dataset.cwState = 'live';
   }
+  /* ------------------------------------------------------------ tour ---- */
+  const tourBtn = $<HTMLButtonElement>('cw-tour');
+  /** Seconds to stay at a viewpoint: long enough to read its words, never less than seven. */
+  const dwell = (v: View) => THREE.MathUtils.clamp(5 + v.text.length / 28, 7, 14);
+  function showTour() {
+    if (!tourBtn) return;
+    tourBtn.setAttribute('aria-pressed', String(!!tour));
+    tourBtn.lastChild!.textContent = tour ? 'Stop tour' : 'Tour';
+    tourBtn.title = tour ? 'Stop the tour and walk yourself (T)' : 'Walk through every viewpoint by itself (T)';
+  }
+  /** Start at the viewpoint after the one on screen, or at the start if the visitor has not begun. */
+  function startTour() {
+    const at = world.viewpoints.indexOf(current);
+    const index = begun && at >= 0 ? (at + 1) % world.viewpoints.length : 0;
+    begin();
+    tour = { index, left: 0, yaw: 0, since: 0 };
+    goTo(world.viewpoints[index]);
+    tour.left = dwell(world.viewpoints[index]);
+    tour.yaw = yaw;
+    showTour();
+  }
+  function stopTour() {
+    if (!tour) return;
+    tour = null;
+    showTour();
+  }
+  function toggleTour() {
+    if (tour) stopTour();
+    else startTour();
+  }
+  /** Every frame: once the flight has landed, stay a while looking slowly about, then fly on. */
+  function stepTour(dt: number) {
+    if (!tour || flight) {
+      if (tour) tour.since = 0;
+      return;
+    }
+    if (tour.since === 0) tour.yaw = yaw;
+    tour.since += dt;
+    // a slow look to one side and back, as someone standing there would
+    if (!still) yaw = tour.yaw + 0.22 * Math.sin((tour.since / tour.left) * Math.PI * 2) * Math.min(1, tour.since / 1.5);
+    tour.left -= dt;
+    if (tour.left > 0) return;
+    yaw = tour.yaw;
+    tour.index = (tour.index + 1) % world.viewpoints.length;
+    const next = world.viewpoints[tour.index];
+    goTo(next);
+    tour.left = dwell(next);
+    tour.since = 0;
+  }
+  // the label sits in a text node of its own, so that the ::before mark stays
+  if (tourBtn) tourBtn.replaceChildren(document.createTextNode('Tour'));
+  tourBtn?.addEventListener('click', () => toggleTour());
+  $('cw-tour-start')?.addEventListener('click', () => startTour());
+
   $('cw-start')?.addEventListener('click', () => {
     begin();
     goTo(world.viewpoints.find((v) => v.id === plan.startView) ?? world.viewpoints[0]);
@@ -475,6 +545,8 @@ export async function start(venue: VenueModule) {
   composer.render();
   await step(plan.copy.loading.open, 1);
   root.dataset.cwState = 'ready';
+  // ?tour=1 starts the tour by itself, for a screen that shows the club unattended
+  if (params.get('tour') === '1') startTour();
 
   /* detail level: shown bottom left, click to step through the three */
   const detailBtn = $<HTMLButtonElement>('cw-detail');
@@ -511,7 +583,7 @@ export async function start(venue: VenueModule) {
       audio: audioState,
       measureLoop,
       strobe: (beat: number, bpm?: number) => world.strobeAt(beat, bpm),
-      state: () => ({ begun, time: plan.times[timeIndex].id, caption: $('cw-caption')?.hidden ? null : $('cw-caption-title')?.textContent, pressed: document.querySelector<HTMLElement>('[data-cw-view][aria-pressed="true"]')?.dataset.cwView ?? null, intro: !$('cw-intro')?.hasAttribute('hidden') }),
+      state: () => ({ tour: tour ? world.viewpoints[tour.index].id : null, begun, time: plan.times[timeIndex].id, caption: $('cw-caption')?.hidden ? null : $('cw-caption-title')?.textContent, pressed: document.querySelector<HTMLElement>('[data-cw-view][aria-pressed="true"]')?.dataset.cwView ?? null, intro: !$('cw-intro')?.hasAttribute('hidden') }),
       go: (i: number) => {
         begin();
         goTo(world.viewpoints[i], true);
@@ -632,6 +704,7 @@ export async function start(venue: VenueModule) {
     govern();
     const t = timer.getElapsed();
 
+    stepTour(dt);
     if (flight) {
       flight.t += dt / flight.dur;
       const k = flight.t >= 1 ? 1 : 0.5 - Math.cos(Math.PI * flight.t) / 2;

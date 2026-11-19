@@ -15,7 +15,7 @@ export const copy: Copy = {
   intro:
     'Ministry of Sound opened in 1991 in a derelict building behind Elephant and Castle, with one room sealed like a bunker to hold the sound. Walk in from Gaunt Street: courtyard, tunnel, bar and The Box, laid out from the venue’s 2026 plans.',
   start: 'Go in',
-  hintKeys: 'Drag to look · WASD to walk · 0 to 9 for viewpoints · L for daytime',
+  hintKeys: 'Drag to look · WASD to walk · 0 to 9 for viewpoints · T for the tour · L for daytime',
   hintTouch: 'Drag to look · the joystick walks · tap a viewpoint below',
   credit: `Unofficial model, not affiliated with Ministry of Sound. ${OSM}`,
   aboutHeading: 'About this model',

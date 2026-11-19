@@ -70,6 +70,7 @@ To put the built site on a site of your own, tell the build where it will live. 
 | Q, E | Fly up and down, out of doors only |
 | Wheel | Walk along the view. In the air (after Q, or from a viewpoint above) it climbs and dives instead |
 | 1 to 9 (0 to 9 in Ministry of Sound) | Jump to a viewpoint |
+| T, or the Tour button | Walk through every viewpoint by itself, staying at each long enough to read it; any key, drag or the wheel takes over again |
 | L | Next time of day |
 | M | Sound on or off |
 | I | Info card |
@@ -85,6 +86,7 @@ Keys held with Ctrl, Cmd or Alt are left to the browser.
 | `view` | a viewpoint id from the venue's plan | Open on that viewpoint |
 | `time` | a time id from the venue's plan: `day` for Ministry of Sound, `morning` for Berghain | Open at that time of day |
 | `detail` | `lite`, `balanced`, `ultra` | Force a quality level |
+| `tour` | `1` | Start the tour as soon as the club has loaded, for a screen that shows it unattended |
 | `ui` | `0` | Hide all interface, for screenshots |
 | `cull` | `0` | Ministry of Sound only: draw every room all the time, for checking the culling |
 
