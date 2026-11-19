@@ -2,6 +2,8 @@
 
 A framework for building walkable 3D nightclubs in the browser, and a library of the parts clubs are made of.
 
+**See it in action at [nader.io/projects/clubs](https://nader.io/projects/clubs/):** Berghain, Ministry of Sound and Flex, walkable in your browser.
+
 It comes in three layers:
 
 - **`src/engine/`**: the framework. It knows nothing about any particular club. It is handed a plan (rooms, doors, stairs, lights, crowds, viewpoints) and does the rest: walking and collision, lighting, crowds, synthesised music, the city around the venue from OpenStreetMap, quality levels.
