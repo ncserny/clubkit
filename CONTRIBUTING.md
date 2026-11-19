@@ -40,6 +40,16 @@ If you changed `src/engine/` or `src/kit/`, show that the other clubs did not ch
 
 By contributing you agree that your contribution is licensed under [CC BY-NC-SA 4.0](LICENSE), like the rest of the repository, and that you have the right to license it. Others may use, adapt and share it for noncommercial purposes with credit, and must share adaptations under the same license. Commercial use needs permission from the maintainer.
 
+## For the maintainer: protecting `main`
+
+`.github/rulesets/main-pull-requests-only.json` is the rule that makes `main` take pull requests only: no direct pushes, no force-pushes, no deleting the branch, for everyone including the owner. GitHub applies rulesets to public repositories, and to private ones only on a paid plan. Once the repository is public, switch it on:
+
+```bash
+gh api -X POST repos/ncserny/clubkit/rulesets --input .github/rulesets/main-pull-requests-only.json
+```
+
+Until then the repository is private and only people invited to it can push at all.
+
 ## Reporting a problem
 
 Open an issue. For a club that is wrong (a room the wrong way round, a bar on the wrong wall), a photograph or a link to a plan is the most useful thing you can attach.
