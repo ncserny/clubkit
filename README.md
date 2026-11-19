@@ -314,6 +314,7 @@ Not affiliated with Berghain.
 - Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, under the Open Database License. Keep this credit visible wherever a venue's `osm.json` or anything derived from it is shown.
 - Rendering: [Three.js](https://threejs.org/) r186.
 - The booth on Berghain's main floor is a homage to Jeff Mills, and the booth in Flex's hall to Electric Indigo. The DJ figures depict nobody in particular.
+- The man on Berghain's door (`venues/berghain/doorman.ts`) is a homage to Sven Marquardt: a doll in his spirit, not a likeness. None of the people named are affiliated with this project.
 
 ## License
 

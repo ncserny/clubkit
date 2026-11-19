@@ -10,10 +10,12 @@ import type { BuildContext, FrameState, VenueHooks } from '../../engine/types';
 import { makeMats, makeStages } from '../../kit';
 import { graffitiWall } from '../../kit/graffiti';
 import { buildBooth } from './booth';
+import { buildDoorman } from './doorman';
 import {
   BIERHOF_ID,
   BULB_POLES,
   CROSS,
+  DOORMAN,
   DOOR_Z,
   FENCE_RUNS,
   FLOOD_POLES,
@@ -884,6 +886,13 @@ export function build(ctx: BuildContext): VenueHooks {
   inner.add(blackMat, boxAt(-4.5, 5.7, -2.2, -3.7, 6.75, 2.2)); // the desk
   inner.add(steelMat, boxAt(-4.55, 6.75, -2.25, -3.65, 6.8, 2.25));
   const deckGlow = new THREE.MeshStandardMaterial({ color: '#000', emissive: new THREE.Color('#ff3a2a'), emissiveIntensity: 1.4 });
+  // the man on the door: beside the portal, facing down the queue, the door a step behind his left shoulder
+  const doorman = buildDoorman();
+  doorman.group.position.set(DOORMAN.x, DOORMAN.y, DOORMAN.z);
+  // the figure is built facing +z; here he faces -x, out along the path, so his left is +z, where the door is
+  doorman.group.rotation.y = -Math.PI / 2;
+  doorman.faceDoor(0.5);
+  group.add(doorman.group);
   // the kit's stage for the booth: its decks and mixer are the kit's
   const stages = makeStages(ctx.quality, makeMats(ctx.quality));
   const booth = buildBooth(stages.stage(group));
@@ -1246,6 +1255,9 @@ export function build(ctx: BuildContext): VenueHooks {
     const { dt, t, beat, bar, pulse, strobe, zone } = frame;
     const inside = zone.inside;
     booth.update(t, beat);
+    // where the visitor is, as the man on the door sees them: to his left is +z here, in front of him is -x
+    const [vx, vz] = ctx.frame.localXZ(frame.camera.position.x, frame.camera.position.z);
+    doorman.update(dt, t, { x: vz - DOORMAN.z, z: -(vx - DOORMAN.x), outside: !inside && frame.camera.position.y < 4 });
     // open on Sunday morning too: the decks stay on
     stages.update(frame, frame.open);
     const lit = inside || zone.id === 'doorstep';

@@ -33,11 +33,12 @@ export const copy: Copy = {
     'The building was then assembled bay by bay from written descriptions and from looking closely at published photographs: beige render, a ground floor sprayed from end to end, a grid of narrow steel windows, a heavy cornice. The concrete, the rust, the gravel and the graffiti are painted by small programs each time the page loads. The graffiti spells nothing. The art on the walls upstairs is invented, because the real art belongs to others.',
     'The crowd is one figure, drawn several hundred times, moving to a beat that is also generated on the spot. Outside, the music is filtered as if through a metre of wall. Inside, it opens.',
     'The booth on the main floor, four turntables and a drum machine played live, is a homage to Jeff Mills. The figure behind it is nobody in particular.',
+    'The man on the door is a homage to Sven Marquardt: grey beard, a tattooed face, rings in the lip, all in black. He is a doll in that spirit, not a likeness, and kinder than the legend. Walk up to him. He looks you over, nods, and holds an arm out to the door.',
     'Where the sources fell silent, the model guesses, and it says so. It is a reconstruction of a place built to resist being recorded: accurate where the public record is, imagined where the door stays shut.',
     'On Sunday morning the shutters go up.',
     'The model comes in three levels of detail. Lite is for phones. Balanced adds depth to every surface, dust in the light and a full crowd. Ultra adds shadows from the club lights and soft contact shadows, for strong graphics. Your device is given the one it can carry; the small Detail link at the bottom left switches between them.',
   ],
-  infoFoot: `<a href="${ABOUT}" rel="noopener">About the project</a>: how it was built, and the sources it was checked against. Not affiliated with Berghain. ${OSM}. Built with Three.js.`,
+  infoFoot: `<a href="${ABOUT}" rel="noopener">About the project</a>: how it was built, and the sources it was checked against. Not affiliated with Berghain or with anyone named here. ${OSM}. Built with Three.js.`,
   loaderNote: 'Nothing is downloaded as a model. The building is being generated on your device.',
   loading: {
     map: 'Laying out Friedrichshain from the map',
