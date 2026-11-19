@@ -155,8 +155,9 @@ export async function buildWorld(scene: THREE.Scene, renderer: THREE.WebGLRender
     city.skylineMaterial.needsUpdate = true;
     if (pools) pools.visible = time.night;
     for (const c of people) {
+      // people are there when the club is open, unless they name the times they are there
       const times = c.mesh.userData.times as string[] | undefined;
-      if (times) c.mesh.visible = times.includes(time.id);
+      c.mesh.visible = times ? times.includes(time.id) : time.open;
     }
     hooks.setTime?.(time, instant);
   }
@@ -181,7 +182,7 @@ export async function buildWorld(scene: THREE.Scene, renderer: THREE.WebGLRender
     setCrowdBeat(beat);
     lights.use(zone.lightSets);
     lights.reset(time.outdoorLights);
-    hooks.update?.({ dt, t, beat, bar: Math.floor(beat / 4), pulse: Math.pow(1 - (beat % 1), 3), strobe: strobeAt(beat, bpm), zone, time, camera });
+    hooks.update?.({ dt, t, beat, bar: Math.floor(beat / 4), pulse: Math.pow(1 - (beat % 1), 3), strobe: time.open ? strobeAt(beat, bpm) : 0, open: time.open, zone, time, camera });
     // a venue may have hidden the rooms that cannot be seen from here; nobody in them is moved
     for (const c of people) if (shown(c.mesh)) c.update(t, beat);
     // Deep inside nothing of the city can be seen, so it is not drawn (or put through the shadow passes).

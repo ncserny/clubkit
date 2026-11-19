@@ -7,7 +7,7 @@ import type { Beam, Stage } from './stage';
 
 /**
  * Club lighting: moving heads that throw beams through the haze, mirror balls, strobes, LED
- * walls. Each moves with the music through the stage's `animate` hook and goes dark by day.
+ * walls. Each moves with the music through the stage's `animate` hook and goes dark while the club is closed.
  *
  * The flash of the room itself (the strobe light that lights the walls) belongs to the engine:
  * `plan.show.strobe` says when it fires, and the engine caps it at 2.9 flashes a second and
@@ -37,10 +37,10 @@ export function movingHeads(stage: Stage, spots: Vec3[], colours: string[], o: {
   const swing = o.swing ?? 0.5;
   const speed = o.speed ?? 0.35;
   const level = o.level ?? 0.5;
-  stage.animate(({ t, pulse }, night) => {
+  stage.animate(({ t, pulse }, open) => {
     for (const { beam, phase } of beams) {
-      beam.mesh.visible = night;
-      if (!night) continue;
+      beam.mesh.visible = open;
+      if (!open) continue;
       beam.mesh.rotation.x = swing * Math.sin(t * speed + phase);
       beam.mesh.rotation.z = swing * Math.cos(t * speed * 0.8 + phase * 1.7);
       beam.set(level * (0.65 + 0.35 * pulse));
@@ -55,7 +55,7 @@ export function mirrorBallGeometry(radius: number) {
 }
 
 /**
- * A mirror ball hung from the ceiling on a rod, turning slowly at night. `at` is the centre of
+ * A mirror ball hung from the ceiling on a rod, turning slowly while the club is open. `at` is the centre of
  * the ball; `ceiling` the height the rod hangs from (a metre above the ball if left out).
  * `spots` adds that many specks of light thrown off it, drifting round the room on the walls
  * of an invisible sphere `reach` metres across (on the levels that have dust in the air).
@@ -90,11 +90,11 @@ export function mirrorBall(stage: Stage, o: { at: Vec3; radius?: number; ceiling
     specks.frustumCulled = false;
     stage.group.add(specks);
   }
-  stage.onTime((night) => {
-    if (specks) specks.visible = night;
+  stage.onTime((open) => {
+    if (specks) specks.visible = open;
   });
-  stage.animate(({ t, pulse }, night) => {
-    if (!night) return;
+  stage.animate(({ t, pulse }, open) => {
+    if (!open) return;
     ball.rotation.y = t * spin;
     if (specks) {
       specks.rotation.y = t * spin;
@@ -129,7 +129,7 @@ function strobeFace(stage: Stage) {
     const lit = new THREE.Color('#f4f7ff').multiplyScalar(3);
     const off = new THREE.Color('#2a2c30');
     const mat = new THREE.MeshBasicMaterial({ color: off.clone(), toneMapped: false });
-    stage.animate(({ strobe }, night) => mat.color.copy(night && strobe > 0 ? lit : off));
+    stage.animate(({ strobe }, open) => mat.color.copy(open && strobe > 0 ? lit : off));
     faces.set(stage.animate, (m = mat));
   }
   return m;
@@ -144,14 +144,14 @@ export function ledScreen(mats: Mats, colour: string, pitch = 1) {
   return new THREE.MeshBasicMaterial({ map, color: colour, side: THREE.DoubleSide });
 }
 
-/** Screens that drift through a band of hues at night and hold a dim grey by day. */
+/** Screens that drift through a band of hues while the club is open and hold a dim grey while it is closed. */
 export function playScreens(stage: Pick<Stage, 'animate' | 'onTime'>, screens: THREE.MeshBasicMaterial[], hue: number, range: number, level = 0.4) {
   const c = new THREE.Color();
-  stage.onTime((night) => {
-    if (!night) for (const s of screens) s.color.set('#17181f');
+  stage.onTime((open) => {
+    if (!open) for (const s of screens) s.color.set('#17181f');
   });
-  stage.animate(({ t, pulse }, night) => {
-    if (!night) return;
+  stage.animate(({ t, pulse }, open) => {
+    if (!open) return;
     screens.forEach((s, i) => {
       s.color.copy(c.setHSL((hue + range * Math.sin(t * 0.21 + i * 1.3) + 1) % 1, 0.85, level + 0.1 * pulse));
       if (s.map) s.map.offset.x = t * 0.05 * (i % 2 ? -1 : 1);
@@ -232,7 +232,7 @@ export function swirlScreen(pitch = 0.03) {
   });
 }
 
-/** A par can: a short black cylinder hung at `at`, its lens lit in a colour that pulses with the beat at night. */
+/** A par can: a short black cylinder hung at `at`, its lens lit in a colour that pulses with the beat while the club is open. */
 export function parCan(stage: Stage, batch: Batch, o: { at: Vec3; colour: string }) {
   const [x, y, z] = o.at;
   batch.add(stage.mats.plain('#0b0b0c', { rough: 0.5, metal: 0.4 }), cyl(x, z, 0.1, y - 0.3, y, 10));
@@ -240,6 +240,6 @@ export function parCan(stage: Stage, batch: Batch, o: { at: Vec3; colour: string
   const base = new THREE.Color(o.colour);
   const lensMesh = new THREE.Mesh(new THREE.CircleGeometry(0.085, 14).rotateX(Math.PI / 2).translate(x, y - 0.301, z), lens);
   stage.group.add(lensMesh);
-  stage.animate(({ pulse }, night) => lens.color.copy(base).multiplyScalar(night ? 0.35 + 0.65 * pulse : 0.05));
+  stage.animate(({ pulse }, open) => lens.color.copy(base).multiplyScalar(open ? 0.35 + 0.65 * pulse : 0.05));
   return lensMesh;
 }

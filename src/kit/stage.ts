@@ -18,11 +18,11 @@ import type { Mats } from './mats';
  *   const floor = stages.stage(roomGroup);
  *   mirrorBall(floor, { at: [0, 5.5, -4] });
  *   stages.finish();                       // after the last component
- *   return { update: (f) => stages.update(f, f.time.night), setTime: (t) => stages.setTime(t.night) };
+ *   return { update: (f) => stages.update(f, f.time.open), setTime: (t) => stages.setTime(t.open) };
  */
 
-/** Called every frame; `night` is false while the time of day has the club empty. */
-export type Animate = (f: FrameState, night: boolean) => void;
+/** Called every frame; `open` is false while the club is closed at this time of day (see `TimeState.open`). */
+export type Animate = (f: FrameState, open: boolean) => void;
 
 export interface Beam {
   mesh: THREE.Mesh;
@@ -39,10 +39,10 @@ export interface Stage {
   /** Solid geometry, merged by material into `group` when the stages are finished. */
   batch: Batch;
   animate(fn: Animate): void;
-  onTime(fn: (night: boolean) => void): void;
+  onTime(fn: (open: boolean) => void): void;
   /** A cone of lit haze hanging down from `at`. Returned so that it can be swung about. */
   beam(at: THREE.Vector3, colour: string, radius: number, length: number): Beam;
-  /** Dust in the air of a box, on the detail levels that have it; shown at night only. */
+  /** Dust in the air of a box, on the detail levels that have it; shown only while the club is open. */
   dust(seed: number, count: number, x: [number, number], y: [number, number], z: [number, number], glow: number, tint?: string): void;
 }
 
@@ -50,21 +50,21 @@ export interface Stages {
   /** A stage in a group. Pass a batch to share one the venue already merges into that group. */
   stage(group: THREE.Group, batch?: Batch): Stage;
   animate(fn: Animate): void;
-  onTime(fn: (night: boolean) => void): void;
+  onTime(fn: (open: boolean) => void): void;
   /** Merge everything added so far into the groups. Call once the components are placed. */
   finish(): void;
-  update(f: FrameState, night: boolean): void;
-  setTime(night: boolean): void;
+  update(f: FrameState, open: boolean): void;
+  setTime(open: boolean): void;
 }
 
 export function makeStages(quality: Quality, mats: Mats): Stages {
   const batches = new Map<Batch, THREE.Group>();
   const animations: Animate[] = [];
-  const timers: ((night: boolean) => void)[] = [];
+  const timers: ((open: boolean) => void)[] = [];
   const beams: THREE.ShaderMaterial[] = [];
   const dusts: { points: THREE.Points; glow: number }[] = [];
   const animate = (fn: Animate) => void animations.push(fn);
-  const onTime = (fn: (night: boolean) => void) => void timers.push(fn);
+  const onTime = (fn: (open: boolean) => void) => void timers.push(fn);
 
   return {
     animate,
@@ -102,18 +102,18 @@ export function makeStages(quality: Quality, mats: Mats): Stages {
       for (const [batch, group] of batches) batch.build(group);
       batches.clear();
     },
-    update(f, night) {
+    update(f, open) {
       for (const b of beams) b.uniforms.uTime.value = f.t;
       for (const d of dusts) {
-        d.points.visible = night;
+        d.points.visible = open;
         const u = (d.points.material as THREE.ShaderMaterial).uniforms;
         u.uTime.value = f.t;
         u.uGlow.value = d.glow * (0.7 + 0.3 * f.pulse);
       }
-      for (const fn of animations) fn(f, night);
+      for (const fn of animations) fn(f, open);
     },
-    setTime(night) {
-      for (const fn of timers) fn(night);
+    setTime(open) {
+      for (const fn of timers) fn(open);
     },
   };
 }

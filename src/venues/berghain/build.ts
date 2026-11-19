@@ -1246,8 +1246,8 @@ export function build(ctx: BuildContext): VenueHooks {
     const { dt, t, beat, bar, pulse, strobe, zone } = frame;
     const inside = zone.inside;
     booth.update(t, beat);
-    // the club runs through Sunday morning: the decks stay on
-    stages.update(frame, true);
+    // open on Sunday morning too: the decks stay on
+    stages.update(frame, frame.open);
     const lit = inside || zone.id === 'doorstep';
     const inHall = rig.isOn('hall');
     if (dust) {

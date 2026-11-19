@@ -1086,7 +1086,6 @@ for (const r of rooms) r.zone.track = HEARS[r.id] ?? (HEARS_BOX.has(r.id) ? 'tec
 // Counts are for the three detail levels: a quarter, a half and three quarters of each room's
 // licensed capacity (GUESS.crowd), shared out between the places people stand in it. Scattering
 // stops when a floor is full, so a small room at the top level holds fewer than it is asked for.
-const NIGHT = ['night'];
 const Q = GUESS.queue;
 const share = (capacity: number, part = 1): ByLevel => GUESS.crowd.map((s) => Math.round(capacity * s * part)) as ByLevel;
 const bounds = (pts: Pt[]): Rect => [Math.min(...pts.map((p) => p[0])), Math.min(...pts.map((p) => p[1])), Math.max(...pts.map((p) => p[0])), Math.max(...pts.map((p) => p[1]))];
@@ -1124,9 +1123,9 @@ const LOFT_SITTERS = spread([...[44.4, 45, 45.6, 46.2].map((i) => at(P(15.33, i)
 const staff = (a: number, b: number, facing: number): Person => at(K(a, b), YARD_Y, facing, 'bouncer');
 const crowds: CrowdSpec[] = [
   /* Gaunt Street: two lines of general admission to the right of the gate, the guest list to the left */
-  { id: 'queue', kind: 'queue', path: [K(COURT.mainGate[1] + 1, -Q.fromBoundary), K(COURT.mainGate[1] + 1 + Q.generalLength, -Q.fromBoundary)], offset: 0.36, spacing: 0.75, start: 0.4, y: YARD_Y, seed: 7, look: 3, times: NIGHT, dress: DRESS.outside },
-  { id: 'queue-2', kind: 'queue', path: [K(COURT.mainGate[1] + 1, -Q.fromBoundary), K(COURT.mainGate[1] + 1 + Q.generalLength, -Q.fromBoundary)], offset: -0.36, spacing: 0.8, start: 0.7, y: YARD_Y, seed: 8, look: 36, times: NIGHT, dress: DRESS.outside },
-  { id: 'guest-list', kind: 'queue', path: [K(COURT.mainGate[0] - 1.9, -Q.fromBoundary - 0.3), K(COURT.mainGate[0] - 1 - Q.guestLength, -Q.fromBoundary - 0.3)], offset: 0, spacing: 0.9, start: 0.4, y: YARD_Y, seed: 9, look: 4, times: NIGHT, dress: DRESS.outside },
+  { id: 'queue', kind: 'queue', path: [K(COURT.mainGate[1] + 1, -Q.fromBoundary), K(COURT.mainGate[1] + 1 + Q.generalLength, -Q.fromBoundary)], offset: 0.36, spacing: 0.75, start: 0.4, y: YARD_Y, seed: 7, look: 3, dress: DRESS.outside },
+  { id: 'queue-2', kind: 'queue', path: [K(COURT.mainGate[1] + 1, -Q.fromBoundary), K(COURT.mainGate[1] + 1 + Q.generalLength, -Q.fromBoundary)], offset: -0.36, spacing: 0.8, start: 0.7, y: YARD_Y, seed: 8, look: 36, dress: DRESS.outside },
+  { id: 'guest-list', kind: 'queue', path: [K(COURT.mainGate[0] - 1.9, -Q.fromBoundary - 0.3), K(COURT.mainGate[0] - 1 - Q.guestLength, -Q.fromBoundary - 0.3)], offset: 0, spacing: 0.9, start: 0.4, y: YARD_Y, seed: 9, look: 4, dress: DRESS.outside },
   {
     // four to six at the gate line and two at the building door (research 7.19), a host at the table, two at the search arches
     id: 'door-staff',
@@ -1144,17 +1143,16 @@ const crowds: CrowdSpec[] = [
       staff(4.8, ARCH_AT + 0.55, FACE.yardLeft),
     ],
     look: 5,
-    times: NIGHT,
     dress: DRESS.staff,
   },
-  { id: 'courtyard', room: 'courtyard', kind: 'scatter', count: share(CAPACITY.courtyard, 0.9), rect: bounds(KR(4.9, 0.5, 22.4, 11.35)), within: KR(4.9, 0.5, 22.4, 11.35), avoid: YARD_KEEP_OUT, clear: 0.35, y: YARD_Y, behaviour: 'talk', seed: 21, gap: 0.62, look: 6, times: NIGHT, dress: DRESS.outside },
-  { id: 'courtyard-seated', room: 'courtyard', kind: 'people', people: PICNIC_SITTERS, count: [10, 20, 30], look: 14, times: NIGHT, dress: DRESS.outside },
-  { id: 'courtyard-bar-staff', room: 'courtyard', kind: 'people', people: [at(K(10.8, 3.5), YARD_Y, FACE.yardIn, 'stand'), at(K(13.6, 3.5), YARD_Y, FACE.yardIn, 'talk')], look: 15, times: NIGHT, dress: DRESS.staff },
+  { id: 'courtyard', room: 'courtyard', kind: 'scatter', count: share(CAPACITY.courtyard, 0.9), rect: bounds(KR(4.9, 0.5, 22.4, 11.35)), within: KR(4.9, 0.5, 22.4, 11.35), avoid: YARD_KEEP_OUT, clear: 0.35, y: YARD_Y, behaviour: 'talk', seed: 21, gap: 0.62, look: 6, dress: DRESS.outside },
+  { id: 'courtyard-seated', room: 'courtyard', kind: 'people', people: PICNIC_SITTERS, count: [10, 20, 30], look: 14, dress: DRESS.outside },
+  { id: 'courtyard-bar-staff', room: 'courtyard', kind: 'people', people: [at(K(10.8, 3.5), YARD_Y, FACE.yardIn, 'stand'), at(K(13.6, 3.5), YARD_Y, FACE.yardIn, 'talk')], look: 15, dress: DRESS.staff },
 
   /* the way in */
-  { id: 'tunnel', room: 'tunnel', kind: 'scatter', count: [3, 6, 9], rect: bounds(KR(4.3, 26, 5.3, 35.3)), within: KR(4.3, 26, 5.3, 35.3), y: 0.02, behaviour: 'talk', seed: 25, gap: 0.8, facing: FACE.yardRight, look: 16, times: NIGHT, dress: DRESS.inside },
-  { id: 'box-office-staff', room: 'boxoffice', kind: 'people', people: [at(K(6.3, 23.1), 0.02, FACE.yardLeft, 'stand')], look: 17, times: NIGHT, dress: DRESS.staff },
-  { id: 'cloakroom-staff', room: 'cloakroom', kind: 'people', people: [at(K(6.3, 31.4), 0.02, FACE.yardLeft, 'stand'), at(K(6.4, 34.2), 0.02, FACE.yardLeft, 'talk')], look: 18, times: NIGHT, dress: DRESS.staff },
+  { id: 'tunnel', room: 'tunnel', kind: 'scatter', count: [3, 6, 9], rect: bounds(KR(4.3, 26, 5.3, 35.3)), within: KR(4.3, 26, 5.3, 35.3), y: 0.02, behaviour: 'talk', seed: 25, gap: 0.8, facing: FACE.yardRight, look: 16, dress: DRESS.inside },
+  { id: 'box-office-staff', room: 'boxoffice', kind: 'people', people: [at(K(6.3, 23.1), 0.02, FACE.yardLeft, 'stand')], look: 17, dress: DRESS.staff },
+  { id: 'cloakroom-staff', room: 'cloakroom', kind: 'people', people: [at(K(6.3, 31.4), 0.02, FACE.yardLeft, 'stand'), at(K(6.4, 34.2), 0.02, FACE.yardLeft, 'talk')], look: 18, dress: DRESS.staff },
 
   /* The 103: a floor of people facing the booth, two deep at the bar, along the walkway rail, on the seating */
   {
@@ -1172,14 +1170,13 @@ const crowds: CrowdSpec[] = [
     faceTo: P(1, 40.4),
     gap: 0.58,
     look: 7,
-    times: NIGHT,
     dress: DRESS.inside,
   },
-  { id: 'the103-bar', room: 'the103', kind: 'people', people: [...row(P(-6.3, 47.72), P(8.7, 47.72), 30, 0.02, FACE.north, 'talk'), ...row(P(-6, 47.15), P(8.4, 47.15), 28, 0.02, FACE.north, 'stand')], count: share(CAPACITY.the103, 0.105), look: 19, times: NIGHT, dress: DRESS.inside },
-  { id: 'the103-walkway', room: 'the103', kind: 'scatter', count: share(CAPACITY.the103, 0.09), rect: R(1.2, 39, 10.7, 45.8), within: poly([1.2, 39.5], [10.6, 42.3], [10.6, 45.8], [10.25, 45.8], [10.25, 44.1], [7.3, 42.25], [1.2, 41.75]), y: U + 0.02, behaviour: 'talk', seed: 33, gap: 0.6, look: 20, times: NIGHT, dress: DRESS.inside },
-  { id: 'the103-seated', room: 'the103', kind: 'people', people: SEATED_103, count: [8, 14, 18], look: 21, times: NIGHT, dress: DRESS.inside },
-  { id: 'the103-dj', room: 'the103', kind: 'people', people: [at(P(1, 40.25), 0.02, FACE.north, 'dj')], headphones: true, look: 22, times: NIGHT, dress: DRESS.inside },
-  { id: 'the103-bar-staff', room: 'the103', kind: 'people', people: row(P(-5.6, 49.25), P(8, 49.25), 5, 0.02, FACE.south, 'stand'), look: 23, times: NIGHT, dress: DRESS.staff },
+  { id: 'the103-bar', room: 'the103', kind: 'people', people: [...row(P(-6.3, 47.72), P(8.7, 47.72), 30, 0.02, FACE.north, 'talk'), ...row(P(-6, 47.15), P(8.4, 47.15), 28, 0.02, FACE.north, 'stand')], count: share(CAPACITY.the103, 0.105), look: 19, dress: DRESS.inside },
+  { id: 'the103-walkway', room: 'the103', kind: 'scatter', count: share(CAPACITY.the103, 0.09), rect: R(1.2, 39, 10.7, 45.8), within: poly([1.2, 39.5], [10.6, 42.3], [10.6, 45.8], [10.25, 45.8], [10.25, 44.1], [7.3, 42.25], [1.2, 41.75]), y: U + 0.02, behaviour: 'talk', seed: 33, gap: 0.6, look: 20, dress: DRESS.inside },
+  { id: 'the103-seated', room: 'the103', kind: 'people', people: SEATED_103, count: [8, 14, 18], look: 21, dress: DRESS.inside },
+  { id: 'the103-dj', room: 'the103', kind: 'people', people: [at(P(1, 40.25), 0.02, FACE.north, 'dj')], headphones: true, look: 22, dress: DRESS.inside },
+  { id: 'the103-bar-staff', room: 'the103', kind: 'people', people: row(P(-5.6, 49.25), P(8, 49.25), 5, 0.02, FACE.south, 'stand'), look: 23, dress: DRESS.staff },
 
   /* The Box: densest in the five metres in front of the booth, thinner round the sides, a few on the deck behind */
   {
@@ -1197,7 +1194,6 @@ const crowds: CrowdSpec[] = [
     gap: 0.52,
     look: 8,
     armsUp: true,
-    times: NIGHT,
     dress: DRESS.inside,
   },
   {
@@ -1215,19 +1211,18 @@ const crowds: CrowdSpec[] = [
     faceTo: P(-30.3, 39.2),
     gap: 0.6,
     look: 24,
-    times: NIGHT,
     dress: DRESS.inside,
   },
-  { id: 'box-deck', room: 'box', kind: 'scatter', count: share(CAPACITY.box, 0.03), rect: bounds(DECK), within: DECK, avoid: [...BOX_STACKS.map((s) => R(...s)), R(-35.3, 42.6, -34.2, 45), R(-34.5, 38.4, -32.5, 40.6), R(-34.1, 44.2, -32.7, 45)], clear: 0.35, y: GUESS.vipDeck + 0.02, behaviour: 'dance', seed: 45, faceTo: P(-24, 40), gap: 0.7, look: 25, times: NIGHT, dress: DRESS.inside },
-  { id: 'box-dj', room: 'box', kind: 'people', people: [at(P(-29.86, 39.1), 0.02, FACE.east, 'dj')], headphones: true, look: 9, times: NIGHT, dress: DRESS.inside },
-  { id: 'vip-balcony', room: 'vipbalcony', kind: 'scatter', count: share(CAPACITY.lounge, 0.2), rect: R(-35, 48.5, -20, 49.5), y: U + 0.02, behaviour: 'talk', seed: 47, facing: FACE.south, gap: 0.6, look: 26, times: NIGHT, dress: DRESS.inside },
+  { id: 'box-deck', room: 'box', kind: 'scatter', count: share(CAPACITY.box, 0.03), rect: bounds(DECK), within: DECK, avoid: [...BOX_STACKS.map((s) => R(...s)), R(-35.3, 42.6, -34.2, 45), R(-34.5, 38.4, -32.5, 40.6), R(-34.1, 44.2, -32.7, 45)], clear: 0.35, y: GUESS.vipDeck + 0.02, behaviour: 'dance', seed: 45, faceTo: P(-24, 40), gap: 0.7, look: 25, dress: DRESS.inside },
+  { id: 'box-dj', room: 'box', kind: 'people', people: [at(P(-29.86, 39.1), 0.02, FACE.east, 'dj')], headphones: true, look: 9, dress: DRESS.inside },
+  { id: 'vip-balcony', room: 'vipbalcony', kind: 'scatter', count: share(CAPACITY.lounge, 0.2), rect: R(-35, 48.5, -20, 49.5), y: U + 0.02, behaviour: 'talk', seed: 47, facing: FACE.south, gap: 0.6, look: 26, dress: DRESS.inside },
 
   /* The Baby Box */
-  { id: 'babybox', room: 'babybox', kind: 'scatter', count: share(CAPACITY.babybox), rect: R(15.5, 51.2, 21.9, 54.2), avoid: BABY_TRUSS.map((c): Rect => R(c[0] - 0.1, c[1] - 0.1, c[0] + 0.1, c[1] + 0.1)), clear: 0.25, y: 0.02, behaviour: 'dance', seed: 51, faceTo: P(18.3, 56), gap: 0.5, look: 10, times: NIGHT, dress: DRESS.inside },
-  { id: 'babybox-dj', room: 'babybox', kind: 'people', people: [at(P(18.3, 55.9), 0.02, FACE.south, 'dj')], headphones: true, look: 11, times: NIGHT, dress: DRESS.inside },
+  { id: 'babybox', room: 'babybox', kind: 'scatter', count: share(CAPACITY.babybox), rect: R(15.5, 51.2, 21.9, 54.2), avoid: BABY_TRUSS.map((c): Rect => R(c[0] - 0.1, c[1] - 0.1, c[0] + 0.1, c[1] + 0.1)), clear: 0.25, y: 0.02, behaviour: 'dance', seed: 51, faceTo: P(18.3, 56), gap: 0.5, look: 10, dress: DRESS.inside },
+  { id: 'babybox-dj', room: 'babybox', kind: 'people', people: [at(P(18.3, 55.9), 0.02, FACE.south, 'dj')], headphones: true, look: 11, dress: DRESS.inside },
 
   /* The Lounge: its capacity of 140 has 65 seats */
-  { id: 'lounge-seated', room: 'lounge', kind: 'people', people: LOUNGE_SITTERS, count: [12, 20, 24], look: 27, times: NIGHT, dress: DRESS.inside },
+  { id: 'lounge-seated', room: 'lounge', kind: 'people', people: LOUNGE_SITTERS, count: [12, 20, 24], look: 27, dress: DRESS.inside },
   {
     id: 'lounge',
     room: 'lounge',
@@ -1243,22 +1238,21 @@ const crowds: CrowdSpec[] = [
     seed: 61,
     gap: 0.62,
     look: 12,
-    times: NIGHT,
     dress: DRESS.inside,
   },
-  { id: 'lounge-bar', room: 'lounge', kind: 'people', people: row(P(-14.9, 40.05), P(-9.7, 41.45), 8, U + 0.02, Math.atan2(0.26, 0.97), 'talk'), count: [3, 6, 8], look: 28, times: NIGHT, dress: DRESS.inside },
-  { id: 'lounge-bar-staff', room: 'lounge', kind: 'people', people: [at(P(-13.2, 38.85), U + 0.02, FACE.north, 'stand'), at(P(-9.84, 39.72), U + 0.02, FACE.north, 'stand')], look: 29, times: NIGHT, dress: DRESS.staff },
+  { id: 'lounge-bar', room: 'lounge', kind: 'people', people: row(P(-14.9, 40.05), P(-9.7, 41.45), 8, U + 0.02, Math.atan2(0.26, 0.97), 'talk'), count: [3, 6, 8], look: 28, dress: DRESS.inside },
+  { id: 'lounge-bar-staff', room: 'lounge', kind: 'people', people: [at(P(-13.2, 38.85), U + 0.02, FACE.north, 'stand'), at(P(-9.84, 39.72), U + 0.02, FACE.north, 'stand')], look: 29, dress: DRESS.staff },
 
   /* The Loft */
-  { id: 'loft', room: 'loft', kind: 'scatter', count: share(CAPACITY.loft, 0.68), rect: R(16.1, 42.2, 27.4, 47.1), within: poly([16.1, 42.2], [20.6, 42.2], [22, 43.4], [26.2, 45.9], [27.4, 47.1], [16.1, 47.1]), y: U + 0.02, behaviour: 'dance', seed: 71, faceTo: P(20, 48.4), gap: 0.58, look: 13, times: NIGHT, dress: DRESS.inside },
-  { id: 'loft-bar', room: 'loft', kind: 'people', people: row(P(...loftWall(0.8, GUESS.loftBarAisle + 1.05)), P(...loftWall(7.2, GUESS.loftBarAisle + 1.05)), 12, U + 0.02, Math.atan2(0.683, 0.73), 'talk'), count: [5, 9, 12], look: 30, times: NIGHT, dress: DRESS.inside },
-  { id: 'loft-seated', room: 'loft', kind: 'people', people: LOFT_SITTERS, count: [3, 6, 8], look: 31, times: NIGHT, dress: DRESS.inside },
-  { id: 'loft-dj', room: 'loft', kind: 'people', people: [at(P(20, LOFT_BOOTH[3] + 0.45), U + 0.02, FACE.south, 'dj')], headphones: true, look: 32, times: NIGHT, dress: DRESS.inside },
-  { id: 'loft-bar-staff', room: 'loft', kind: 'people', people: [at(P(...loftWall(2.5, 0.52)), U + 0.02, Math.atan2(-0.683, -0.73), 'stand'), at(P(...loftWall(5.5, 0.52)), U + 0.02, Math.atan2(-0.683, -0.73), 'stand')], look: 33, times: NIGHT, dress: DRESS.staff },
+  { id: 'loft', room: 'loft', kind: 'scatter', count: share(CAPACITY.loft, 0.68), rect: R(16.1, 42.2, 27.4, 47.1), within: poly([16.1, 42.2], [20.6, 42.2], [22, 43.4], [26.2, 45.9], [27.4, 47.1], [16.1, 47.1]), y: U + 0.02, behaviour: 'dance', seed: 71, faceTo: P(20, 48.4), gap: 0.58, look: 13, dress: DRESS.inside },
+  { id: 'loft-bar', room: 'loft', kind: 'people', people: row(P(...loftWall(0.8, GUESS.loftBarAisle + 1.05)), P(...loftWall(7.2, GUESS.loftBarAisle + 1.05)), 12, U + 0.02, Math.atan2(0.683, 0.73), 'talk'), count: [5, 9, 12], look: 30, dress: DRESS.inside },
+  { id: 'loft-seated', room: 'loft', kind: 'people', people: LOFT_SITTERS, count: [3, 6, 8], look: 31, dress: DRESS.inside },
+  { id: 'loft-dj', room: 'loft', kind: 'people', people: [at(P(20, LOFT_BOOTH[3] + 0.45), U + 0.02, FACE.south, 'dj')], headphones: true, look: 32, dress: DRESS.inside },
+  { id: 'loft-bar-staff', room: 'loft', kind: 'people', people: [at(P(...loftWall(2.5, 0.52)), U + 0.02, Math.atan2(-0.683, -0.73), 'stand'), at(P(...loftWall(5.5, 0.52)), U + 0.02, Math.atan2(-0.683, -0.73), 'stand')], look: 33, dress: DRESS.staff },
 
   /* behind the scenes */
-  { id: 'arch80', room: 'arch80', kind: 'scatter', count: [3, 5, 7], rect: R(-37.4, 59.2, -32.4, 64.8), avoid: [R(...ARCH80.pool)], clear: 0.5, y: 0.02, behaviour: 'talk', seed: 81, gap: 0.8, look: 34, times: NIGHT, dress: DRESS.inside },
-  { id: 'wc-w', room: 'wc-w', kind: 'scatter', count: [2, 4, 6], rect: R(-18.9, 52.2, -16, 56), y: 0.02, behaviour: 'talk', seed: 83, gap: 0.8, look: 35, times: NIGHT, dress: DRESS.inside },
+  { id: 'arch80', room: 'arch80', kind: 'scatter', count: [3, 5, 7], rect: R(-37.4, 59.2, -32.4, 64.8), avoid: [R(...ARCH80.pool)], clear: 0.5, y: 0.02, behaviour: 'talk', seed: 81, gap: 0.8, look: 34, dress: DRESS.inside },
+  { id: 'wc-w', room: 'wc-w', kind: 'scatter', count: [2, 4, 6], rect: R(-18.9, 52.2, -16, 56), y: 0.02, behaviour: 'talk', seed: 83, gap: 0.8, look: 35, dress: DRESS.inside },
 ];
 
 /* ------------------------------------------------------------------ times ---- */
@@ -1267,6 +1261,7 @@ const times: TimeState[] = [
     id: 'night',
     label: 'Saturday 01:30',
     night: true,
+    open: true,
     sun: { azimuth: 200, elevation: 35, colour: '#9fb0d8', intensity: 0.25, indoors: false },
     hemi: { sky: '#46506c', ground: '#2a2420', intensity: 0.42, indoors: 0.16 },
     sky: { top: '#05060c', mid: '#14131d', horizon: '#5a3b2a', sun: '#000000' },
@@ -1280,8 +1275,9 @@ const times: TimeState[] = [
   },
   {
     id: 'day',
-    label: 'Daytime, empty',
+    label: 'Daytime · closed',
     night: false,
+    open: false,
     sun: { azimuth: 205, elevation: 40, colour: '#fff3e0', intensity: 3, indoors: false },
     hemi: { sky: '#b9cde6', ground: '#6b6358', intensity: 1.1, indoors: 0.75 },
     sky: { top: '#4b78b8', mid: '#8db0d8', horizon: '#d9dfe2', sun: '#fff2d8' },

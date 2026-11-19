@@ -8,7 +8,7 @@ import { LEVEL_NAMES, chooseLevel, nextLevel, pickQuality } from './quality';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { setAnisotropy } from './util';
 import { buildWorld, type View, type World } from './world';
-import { audioState, audioTime, isMuted, measureLoop, setInside, setMuted, setTempo, startAudio, tempoOf } from './audio';
+import { audioState, audioTime, isMuted, measureLoop, setInside, setMuted, setRoomTone, setTempo, startAudio, tempoOf } from './audio';
 import { applyCopy } from './copy';
 import { EYE } from './nav';
 import type { VenueModule } from './types';
@@ -43,6 +43,9 @@ const GrainShader = {
 };
 
 /** Build a venue and run it in the page. */
+/** How loud the room tone of a closed club is indoors, as a gain. Faint: it is there to say the sound is on, not to be listened to. */
+const ROOM_TONE = 0.05;
+
 export async function start(venue: VenueModule) {
   const root = document.documentElement;
   const { plan } = venue;
@@ -718,7 +721,10 @@ export async function start(venue: VenueModule) {
     }
     if (import.meta.env.DEV) renderer.info.reset();
     world.update(dt, t, beat, camera, zone, bpm);
-    setInside(zone.music, zone.loudness, zone.echo, zone.track);
+    // a closed club plays nothing: what is left is the faint tone of the empty building, fainter still out of doors
+    const open = world.time().open;
+    setInside(zone.music, zone.loudness, zone.echo, open ? zone.track : null);
+    setRoomTone(open ? 0 : zone.inside ? ROOM_TONE : ROOM_TONE * 0.25);
     bloom.strength = zone.inside ? 0.85 : world.time().bloom;
     grain.uniforms.time.value = t;
     renderer.toneMappingExposure = zone.exposure ?? 1;

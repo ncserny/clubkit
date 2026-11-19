@@ -120,7 +120,6 @@ const through = (...ways: Rect[]) => ways.map((area) => ({ area, y0: Q, y1: Q + 
 
 const caption = (title: string, text: string) => ({ title, text });
 const V = (x: number, z: number, y: number): Vec3 => [x, y, z];
-const NIGHT = ['night'];
 
 /* ------------------------------------------------------------------ rooms ---- */
 const BLACK = { floor: '#77736c', walls: '#141416', ceiling: '#0c0c0d' };
@@ -376,20 +375,19 @@ const crowds: CrowdSpec[] = [
     y: Q + 0.02,
     seed: 5,
     spacing: 0.72,
-    times: NIGHT,
     dress: WARDROBE.mixed,
     staff: [bouncer(3.1, FOYER.z0 - 0.9, Q + 0.02, F.canal + 0.4), bouncer(6.1, FOYER.z0 - 0.9, Q + 0.02, F.canal - 0.4)],
   }),
-  group({ id: 'garden-seated', room: 'quay', people: TABLES.flatMap(([x, z]) => [-0.5, 0.5].flatMap((dx) => [person(x + dx, z - 0.75, Q + 0.46, F.inland, 'sit'), person(x + dx, z + 0.75, Q + 0.46, F.canal, 'sit')])), count: [8, 16, 24], times: NIGHT, dress: WARDROBE.summer }),
-  talkers({ id: 'garden', avoid: TABLES.map(([x, z]): Rect => [x - 1.1, z - 1.1, x + 1.1, z + 1.1]), clear: 0.2, room: 'quay', rect: GARDEN, y: Q + 0.02, count: [14, 34, 60], seed: 11, gap: 0.7, times: NIGHT, dress: WARDROBE.summer }),
-  talkers({ id: 'quay-edge', room: 'quay', rect: [10, -13.4, 40, -12], y: Q + 0.02, count: [5, 12, 20], seed: 13, gap: 0.9, times: NIGHT, dress: WARDROBE.mixed }),
+  group({ id: 'garden-seated', room: 'quay', people: TABLES.flatMap(([x, z]) => [-0.5, 0.5].flatMap((dx) => [person(x + dx, z - 0.75, Q + 0.46, F.inland, 'sit'), person(x + dx, z + 0.75, Q + 0.46, F.canal, 'sit')])), count: [8, 16, 24], dress: WARDROBE.summer }),
+  talkers({ id: 'garden', avoid: TABLES.map(([x, z]): Rect => [x - 1.1, z - 1.1, x + 1.1, z + 1.1]), clear: 0.2, room: 'quay', rect: GARDEN, y: Q + 0.02, count: [14, 34, 60], seed: 11, gap: 0.7, dress: WARDROBE.summer }),
+  talkers({ id: 'quay-edge', room: 'quay', rect: [10, -13.4, 40, -12], y: Q + 0.02, count: [5, 12, 20], seed: 13, gap: 0.9, dress: WARDROBE.mixed }),
   // the door
-  doorStaff({ id: 'cashier', room: 'foyer', people: [person(FOYER.x0 + 0.5, -2.1, Q + 0.02, F.downstream, 'stand'), bouncer(6.6, -1.6, Q + 0.02, F.canal), person(7.4, FOYER.z0 + 1, Q + 0.02, F.upstream, 'stand')], times: NIGHT }),
-  talkers({ id: 'wc', room: 'wc', rect: [WC.x0 + 0.5, WC.z0 + 1.9, WC.x1 - 1.2, WC.z1 - 0.4], y: Q + 0.02, count: [2, 4, 6], seed: 41, gap: 0.9, times: NIGHT, dress: WARDROBE.black }),
+  doorStaff({ id: 'cashier', room: 'foyer', people: [person(FOYER.x0 + 0.5, -2.1, Q + 0.02, F.downstream, 'stand'), bouncer(6.6, -1.6, Q + 0.02, F.canal), person(7.4, FOYER.z0 + 1, Q + 0.02, F.upstream, 'stand')] }),
+  talkers({ id: 'wc', room: 'wc', rect: [WC.x0 + 0.5, WC.z0 + 1.9, WC.x1 - 1.2, WC.z1 - 0.4], y: Q + 0.02, count: [2, 4, 6], seed: 41, gap: 0.9, dress: WARDROBE.black }),
   // the café: standing between the sofas, sitting on them and at the bar
-  talkers({ id: 'cafe', room: 'cafe', rect: [10, CAFE_RAISED.z1 + 1.2, 31, CAFE.z1 - 0.5], avoid: [...SOFAS.map((o) => o.rect), [22.6, -2.6, 25.4, CAFE.z1]], clear: 0.35, y: Q + 0.02, count: [10, 26, 44], seed: 21, gap: 0.62, faceTo: [34, -5], times: NIGHT, dress: WARDROBE.mixed }),
-  talkers({ id: 'cafe-raised', room: 'cafe', rect: [13.5, CAFE_BAR[0][1] + 1, 26, CAFE_RAISED.z1 - 0.2], avoid: CAFE_COLUMNS.map(([x, z]): Rect => [x - 0.3, z - 0.3, x + 0.3, z + 0.3]), clear: 0.2, y: CAFE_RAISED.y + 0.02, count: [4, 9, 14], seed: 23, gap: 0.7, times: NIGHT, dress: WARDROBE.mixed }),
-  group({ id: 'cafe-bar-staff', room: 'cafe', people: [person(15.5, CAFE.z0 + 1.1, CAFE_RAISED.y + 0.02, F.inland, 'stand'), person(21, CAFE.z0 + 1.1, CAFE_RAISED.y + 0.02, F.inland, 'stand')], times: NIGHT, dress: WARDROBE.staff }),
+  talkers({ id: 'cafe', room: 'cafe', rect: [10, CAFE_RAISED.z1 + 1.2, 31, CAFE.z1 - 0.5], avoid: [...SOFAS.map((o) => o.rect), [22.6, -2.6, 25.4, CAFE.z1]], clear: 0.35, y: Q + 0.02, count: [10, 26, 44], seed: 21, gap: 0.62, faceTo: [34, -5], dress: WARDROBE.mixed }),
+  talkers({ id: 'cafe-raised', room: 'cafe', rect: [13.5, CAFE_BAR[0][1] + 1, 26, CAFE_RAISED.z1 - 0.2], avoid: CAFE_COLUMNS.map(([x, z]): Rect => [x - 0.3, z - 0.3, x + 0.3, z + 0.3]), clear: 0.2, y: CAFE_RAISED.y + 0.02, count: [4, 9, 14], seed: 23, gap: 0.7, dress: WARDROBE.mixed }),
+  group({ id: 'cafe-bar-staff', room: 'cafe', people: [person(15.5, CAFE.z0 + 1.1, CAFE_RAISED.y + 0.02, F.inland, 'stand'), person(21, CAFE.z0 + 1.1, CAFE_RAISED.y + 0.02, F.inland, 'stand')], dress: WARDROBE.staff }),
   group({
     id: 'cafe-seated',
     room: 'cafe',
@@ -399,26 +397,24 @@ const crowds: CrowdSpec[] = [
       return [0.3, 0.7].map((t) => (long ? person((x0 + x1) / 2 + (back === '+x' ? -0.12 : 0.12), z0 + (z1 - z0) * t, Q + 0.53, facing, 'sit') : person(x0 + (x1 - x0) * t, (z0 + z1) / 2 + (back === '+z' ? -0.12 : 0.12), Q + 0.53, facing, 'sit')));
     }),
     count: [4, 9, 14],
-    times: NIGHT,
     dress: WARDROBE.mixed,
   }),
-  group({ id: 'cafe-stools', room: 'cafe', people: STOOLS.filter((_, i) => i % 2 === 0).map(([x, z]) => person(x, z, CAFE_RAISED.y + 0.76, F.canal, 'sit')), count: [1, 3, 4], times: NIGHT, dress: WARDROBE.mixed }),
-  dj({ id: 'cafe-dj', room: 'cafe', at: { x: CAFE_STAGE.x0 + 2.25, y: CAFE_STAGE.y, z: (CAFE_STAGE.z0 + CAFE_STAGE.z1) / 2, facing: F.upstream }, times: NIGHT }),
+  group({ id: 'cafe-stools', room: 'cafe', people: STOOLS.filter((_, i) => i % 2 === 0).map(([x, z]) => person(x, z, CAFE_RAISED.y + 0.76, F.canal, 'sit')), count: [1, 3, 4], dress: WARDROBE.mixed }),
+  dj({ id: 'cafe-dj', room: 'cafe', at: { x: CAFE_STAGE.x0 + 2.25, y: CAFE_STAGE.y, z: (CAFE_STAGE.z0 + CAFE_STAGE.z1) / 2, facing: F.upstream } }),
   // the hall: the dance strip packed and facing the stage, the raised side standing and talking
-  dancers({ id: 'floor', room: 'hall', rect: [HALL.x0 + 4, SPLIT + 0.3, STAGE.x0 - 0.7, HALL.z1 - 0.3], y: Q + 0.02, count: [70, 170, 280], seed: 31, gap: 0.55, avoid: [[STAGE.x0 - 7.4, STAGE_MID - 0.8, STAGE.x0 - 2.6, STAGE_MID + 0.8], [HALL.x0 + 4, STAGE_MID - 1.6, HALL.x0 + 9, STAGE_MID - 0.2]], clear: 0.15, faceTo: [STAGE.x0 + 1, STAGE_MID], armsUp: true, times: NIGHT, dress: WARDROBE.black }),
+  dancers({ id: 'floor', room: 'hall', rect: [HALL.x0 + 4, SPLIT + 0.3, STAGE.x0 - 0.7, HALL.z1 - 0.3], y: Q + 0.02, count: [70, 170, 280], seed: 31, gap: 0.55, avoid: [[STAGE.x0 - 7.4, STAGE_MID - 0.8, STAGE.x0 - 2.6, STAGE_MID + 0.8], [HALL.x0 + 4, STAGE_MID - 1.6, HALL.x0 + 9, STAGE_MID - 0.2]], clear: 0.15, faceTo: [STAGE.x0 + 1, STAGE_MID], armsUp: true, dress: WARDROBE.black }),
   // the canal side of the floor, by the bar: looser, half of them dancing
-  dancers({ id: 'floor-left', room: 'hall', rect: [9.5, HALL.z0 + 2.7, PLATFORM_X - 1.6, SPLIT + 0.2], y: Q + 0.02, count: [24, 60, 100], seed: 35, gap: 0.62, faceTo: [STAGE.x0 + 1, STAGE_MID], avoid: [[22.7, HALL.z0, 25.3, HALL.z0 + 4.2]], clear: 0.15, times: NIGHT, dress: WARDROBE.black }),
-  talkers({ id: 'side', room: 'hall', rect: [PLATFORM_X + 1.2, HALL.z0 + 1.2, STAGE.x0 - 0.8, SPLIT - 1.3], y: Q + GUESS.platformRise + 0.02, count: [6, 14, 22], seed: 33, gap: 0.62, faceTo: [STAGE.x0, STAGE_MID], times: NIGHT, dress: WARDROBE.black }),
+  dancers({ id: 'floor-left', room: 'hall', rect: [9.5, HALL.z0 + 2.7, PLATFORM_X - 1.6, SPLIT + 0.2], y: Q + 0.02, count: [24, 60, 100], seed: 35, gap: 0.62, faceTo: [STAGE.x0 + 1, STAGE_MID], avoid: [[22.7, HALL.z0, 25.3, HALL.z0 + 4.2]], clear: 0.15, dress: WARDROBE.black }),
+  talkers({ id: 'side', room: 'hall', rect: [PLATFORM_X + 1.2, HALL.z0 + 1.2, STAGE.x0 - 0.8, SPLIT - 1.3], y: Q + GUESS.platformRise + 0.02, count: [6, 14, 22], seed: 33, gap: 0.62, faceTo: [STAGE.x0, STAGE_MID], dress: WARDROBE.black }),
   group({
     id: 'hall-bar',
     room: 'hall',
     people: [10.7, 11.9, 13.1, 14.4, 15.6, 16.9, 18.1, 19.3, 20.4].map((x, i) => person(x, HALL_BAR[0][1] + 0.6, Q + 0.02, F.canal + (i % 2 ? 0.3 : -0.2), 'talk')),
     count: [4, 7, 9],
-    times: NIGHT,
     dress: WARDROBE.black,
   }),
-  group({ id: 'hall-staff', room: 'hall', people: [person(12.5, HALL.z0 + 0.8, Q + 0.14, F.inland, 'stand'), person(16, HALL.z0 + 0.8, Q + 0.14, F.inland, 'stand'), person(19, HALL.z0 + 0.8, Q + 0.14, F.inland, 'talk'), person(FOH.x, FOH.z - 0.85, Q + GUESS.platformRise + 0.02, F.downstream, 'stand')], times: NIGHT, dress: WARDROBE.staff }),
-  dj({ id: 'dj', room: 'hall', at: DJ_AT, times: NIGHT }),
+  group({ id: 'hall-staff', room: 'hall', people: [person(12.5, HALL.z0 + 0.8, Q + 0.14, F.inland, 'stand'), person(16, HALL.z0 + 0.8, Q + 0.14, F.inland, 'stand'), person(19, HALL.z0 + 0.8, Q + 0.14, F.inland, 'talk'), person(FOH.x, FOH.z - 0.85, Q + GUESS.platformRise + 0.02, F.downstream, 'stand')], dress: WARDROBE.staff }),
+  dj({ id: 'dj', room: 'hall', at: DJ_AT }),
 ];
 
 /* ------------------------------------------------------------- viewpoints ---- */
@@ -440,6 +436,7 @@ const times: TimeState[] = [
     id: 'night',
     label: 'Friday 01:30',
     night: true,
+    open: true,
     sun: { azimuth: 150, elevation: 38, colour: '#9fb0d8', intensity: 0.3, indoors: false },
     hemi: { sky: '#46506c', ground: '#2a2420', intensity: 0.46, indoors: 0.22 },
     sky: { top: '#05060c', mid: '#14131d', horizon: '#5a3b2a', sun: '#000000' },
@@ -453,8 +450,9 @@ const times: TimeState[] = [
   },
   {
     id: 'day',
-    label: 'Afternoon, empty',
+    label: 'Afternoon · closed',
     night: false,
+    open: false,
     sun: { azimuth: 215, elevation: 42, colour: '#fff3e0', intensity: 3, indoors: false },
     hemi: { sky: '#b9cde6', ground: '#6b6358', intensity: 1.1, indoors: 0.7 },
     sky: { top: '#4b78b8', mid: '#8db0d8', horizon: '#d9dfe2', sun: '#fff2d8' },
