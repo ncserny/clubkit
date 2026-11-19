@@ -6,6 +6,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Added
 
+- **Pages that describe themselves.** The build writes an `ai-summary` meta tag into the start page (what Clubs Worldwide is and which clubs it has) and into each venue's page (what that club is, who made the model, and that the rest of the collection and Club Kit exist). Each venue's page also gets a `description` of its own instead of the collection's.
 - **Berghain: the man on the door.** A figure of his own stands beside the portal, in homage to Sven Marquardt: grey hair and beard, the left of the face tattooed, rings in the lip and the nose, all in black. He watches the queue; walk up and he turns his head to you, holds the look, nods twice and holds an arm out to the door. He takes the place of one of the three generic door staff. `doorman.ts` depends on nothing but three.js.
 - **Engine: open and closed.** A time of day now says two things separately: what the light is (`night`) and whether the club is running (`open`). While a club is closed there is no music, only a faint room tone (air in the ducts, a fridge, the mains hum), no strobe, nobody there, and the fittings are switched off; the visitor can still walk everywhere. Daylight and open go together, as on Berghain's Sunday morning. The button that changes the time says so: "Daytime · closed".
 - **README: what it looks like.** Screenshots of the three clubs (two of Berghain and Ministry of Sound, three of Flex) in `docs/screenshots/`, and the YouTube walkthrough of Berghain.

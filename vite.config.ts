@@ -25,6 +25,19 @@ function cards(up: string) {
     .join('');
 }
 const LIST = '<div id="cw-choose-list" class="cw-choose-list">';
+const attr = (text: string) => escape(text).replace(/"/g, '&quot;');
+
+/**
+ * What an AI agent reading the page should take from it, in a sentence or three: the
+ * `ai-summary` meta tag. The start page lists every club; a venue's page says what that club is.
+ */
+function summary(venue?: { name: string; city: string; text: string; by?: string }) {
+  const list = catalogue();
+  const open = 'Open source: anyone can build a club with Club Kit (https://github.com/ncserny/clubkit), licensed CC BY-NC-SA 4.0.';
+  if (!venue)
+    return `Clubs Worldwide: walkable 3D models of nightclubs that run in the browser, built entirely in code, with no photographs or model files. The clubs: ${list.map((v) => `${v.name} in ${v.city}`).join(', ')}. Each has an address of its own and viewpoints that can be linked to. ${open}`;
+  return `${venue.name}, ${venue.city}, as a walkable 3D model that runs in the browser, built entirely in code. ${venue.text}${venue.by ? ` Model by ${venue.by}.` : ''} Part of Clubs Worldwide, which also has ${list.filter((v) => v.name !== venue.name).map((v) => `${v.name} (${v.city})`).join(' and ')}. ${open}`;
+}
 
 /** Canonical and Open Graph tags for the page, as far as the environment says where it lives. */
 function siteMeta(): Plugin {
@@ -33,7 +46,7 @@ function siteMeta(): Plugin {
     transformIndexHtml(html) {
       const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? '';
       const description = /<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? '';
-      const tags = [`<meta property="og:type" content="website" />`, `<meta property="og:title" content="${title}" />`, `<meta property="og:description" content="${description}" />`];
+      const tags = [`<meta name="ai-summary" content="${attr(summary())}" />`, `<meta property="og:type" content="website" />`, `<meta property="og:title" content="${title}" />`, `<meta property="og:description" content="${description}" />`];
       if (SITE_URL) tags.push(`<link rel="canonical" href="${SITE_URL}" />`, `<meta property="og:url" content="${SITE_URL}" />`);
       if (SHARE_IMAGE) tags.push(`<meta property="og:image" content="${SHARE_IMAGE}" />`, `<meta property="og:image:width" content="1200" />`, `<meta property="og:image:height" content="630" />`, `<meta name="twitter:card" content="summary_large_image" />`, `<meta name="twitter:image" content="${SHARE_IMAGE}" />`);
       return html.replace('</head>', `  ${tags.join('\n    ')}\n  </head>`).replace(`${LIST}</div>`, `${LIST}${cards('./')}</div>`);
@@ -68,6 +81,10 @@ function venuePages(): Plugin {
           page = page
             .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
             .replace(/(<meta property="og:title" content=")[^"]*/, `$1${title}`)
+            // a description and a summary of this club, not of the collection
+            .replace(/(<meta name="description" content=")[^"]*/, `$1${attr(`${entry.name}, ${entry.city}, as an interactive 3D virtual tour in the browser. ${entry.text}`)}`)
+            .replace(/(<meta property="og:description" content=")[^"]*/, `$1${attr(`${entry.name}, ${entry.city}, as an interactive 3D virtual tour in the browser. ${entry.text}`)}`)
+            .replace(/(<meta name="ai-summary" content=")[^"]*/, `$1${attr(summary(entry))}`)
             .replace('<h1 id="cw-name"></h1>', `<h1 id="cw-name">${escape(entry.name)}</h1>`)
             .replace('<h2 id="cw-intro-name"></h2>', `<h2 id="cw-intro-name">${escape(entry.name)}, ${escape(entry.city)}</h2>`)
             .replace('<p id="cw-intro-text"></p>', `<p id="cw-intro-text">${escape(entry.text)}</p>`);
