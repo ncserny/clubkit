@@ -486,29 +486,13 @@ function mixer(g: Gear, m: THREE.Matrix4) {
   }
 }
 
-/**
- * Dress a DJ desk. `desk` is its outline on the floor, a rectangle: the first two corners are
- * the crowd's side, the last is the DJ's corner next to the first. `top` is the height of the
- * desk top. `layout` is `full` unless the booth wants only the two players and the mixer.
- */
-export function djGear(stage: Stage, desk: Pt[], top: number, layout: BoothLayout = 'full') {
+/** The materials and batches a desk's pieces are built from. */
+function makeGear(stage: Stage, root: THREE.Group): Gear {
   const fin = stage.mats;
-  const [a, b, , d] = desk;
-  const up = new THREE.Vector3(0, 1, 0);
-  const right = new THREE.Vector3(b[0] - a[0], 0, b[1] - a[1]).normalize();
-  const toDj = new THREE.Vector3(d[0] - a[0], 0, d[1] - a[1]);
-  const depth = toDj.length();
-  toDj.normalize();
-  // whichever way round the corners were listed, x is the DJ's right
-  if (new THREE.Vector3().crossVectors(right, up).dot(toDj) < 0) right.negate();
-  const root = new THREE.Group();
-  root.applyMatrix4(new THREE.Matrix4().makeBasis(right, up, toDj).setPosition(desk.reduce((n, p) => n + p[0], 0) / desk.length, top, desk.reduce((n, p) => n + p[1], 0) / desk.length));
-  stage.group.add(root);
-
   const map = sheet();
   const lit = () => new THREE.MeshBasicMaterial({ map });
   const strip = canvasTexture(512, 128, (c, w, h) => paintWave(c, 0, 0, w, h, rng(73)), { repeat: [1, 1] });
-  const g: Gear = {
+  return {
     root,
     solid: new Batch(),
     glow: new Batch(),
@@ -534,6 +518,76 @@ export function djGear(stage: Stage, desk: Pt[], top: number, layout: BoothLayou
     },
     spin: [],
   };
+}
+
+/** Merge what was built, and keep it alive: meters on the beat, screens scrolling, records turning; dark by day. */
+function finishGear(stage: Stage, g: Gear) {
+  g.solid.build(g.root);
+  g.glow.build(g.root, { cast: false, receive: false });
+
+  const lamps = [g.mat.lit, g.mat.beat, g.mat.peak, ...g.mat.waves];
+  // by day the room is empty and the desk is switched off
+  stage.onTime((night) => {
+    for (const m of lamps) m.color.setScalar(night ? 1 : 0.04);
+  });
+  stage.animate(({ t, pulse }, night) => {
+    if (!night) return;
+    g.mat.beat.color.setScalar(0.15 + 0.85 * pulse);
+    g.mat.peak.color.setScalar(pulse > 0.7 ? 1 : 0.05);
+    g.mat.waves.forEach((w, i) => (w.map!.offset.x = (t * 0.22 + i * 0.37) % 1));
+    for (const o of g.spin) o.rotation.y = -t * SPIN;
+  });
+}
+
+/** How big each piece is, in metres: `w` across the DJ, `d` away from them, `top` the height of its control surface. */
+export const DJ_SIZES = { player: PLAYER, turntable: DECK, mixer: MIXER };
+
+/** One piece on a desk, placed by its centre in the desk's frame: x to the DJ's right, z toward the DJ. */
+export type DeskPiece =
+  | { kind: 'turntable'; x: number; z?: number; /** The colour of the record's label, as a hue in degrees. */ hue?: number }
+  | { kind: 'player'; x: number; z?: number; /** Whether a track is running on it. */ live?: boolean }
+  | { kind: 'mixer'; x: number; z?: number };
+
+/**
+ * Any arrangement of the pieces, for a booth that is not one of the two layouts: four
+ * turntables and a mixer, say, with room left for a venue's own machine. `frame` places the
+ * desk's frame in the stage: its origin on the desk top, x to the DJ's right, y up, z toward the DJ.
+ */
+export function djPieces(stage: Stage, frame: THREE.Matrix4, pieces: DeskPiece[]) {
+  const root = new THREE.Group();
+  root.applyMatrix4(frame);
+  stage.group.add(root);
+  const g = makeGear(stage, root);
+  let players = 0;
+  for (const p of pieces) {
+    const at = T(p.x, 0, p.z ?? 0);
+    if (p.kind === 'turntable') turntable(g, at, p.hue ?? 205);
+    else if (p.kind === 'mixer') mixer(g, at);
+    else player(g, at, players++, p.live ?? true);
+  }
+  finishGear(stage, g);
+  return root;
+}
+
+/**
+ * Dress a DJ desk. `desk` is its outline on the floor, a rectangle: the first two corners are
+ * the crowd's side, the last is the DJ's corner next to the first. `top` is the height of the
+ * desk top. `layout` is `full` unless the booth wants only the two players and the mixer.
+ */
+export function djGear(stage: Stage, desk: Pt[], top: number, layout: BoothLayout = 'full') {
+  const [a, b, , d] = desk;
+  const up = new THREE.Vector3(0, 1, 0);
+  const right = new THREE.Vector3(b[0] - a[0], 0, b[1] - a[1]).normalize();
+  const toDj = new THREE.Vector3(d[0] - a[0], 0, d[1] - a[1]);
+  const depth = toDj.length();
+  toDj.normalize();
+  // whichever way round the corners were listed, x is the DJ's right
+  if (new THREE.Vector3().crossVectors(right, up).dot(toDj) < 0) right.negate();
+  const root = new THREE.Group();
+  root.applyMatrix4(new THREE.Matrix4().makeBasis(right, up, toDj).setPosition(desk.reduce((n, p) => n + p[0], 0) / desk.length, top, desk.reduce((n, p) => n + p[1], 0) / desk.length));
+  stage.group.add(root);
+
+  const g = makeGear(stage, root);
 
   // Everything's near edge sits the same distance from the DJ's edge of the desk.
   const near = depth / 2 - 0.05;
@@ -561,21 +615,7 @@ export function djGear(stage: Stage, desk: Pt[], top: number, layout: BoothLayou
     into(g.solid, new THREE.Matrix4())(g.mat.rubber, wedge(4 * pitch + 0.01, foot + 0.012, SHELF.lift - 0.002 - 0.012 * slope, foot - run, SHELF.lift - 0.002 + run * slope));
   }
 
-  g.solid.build(root);
-  g.glow.build(root, { cast: false, receive: false });
-
-  const lamps = [g.mat.lit, g.mat.beat, g.mat.peak, ...g.mat.waves];
-  // by day the room is empty and the desk is switched off
-  stage.onTime((night) => {
-    for (const m of lamps) m.color.setScalar(night ? 1 : 0.04);
-  });
-  stage.animate(({ t, pulse }, night) => {
-    if (!night) return;
-    g.mat.beat.color.setScalar(0.15 + 0.85 * pulse);
-    g.mat.peak.color.setScalar(pulse > 0.7 ? 1 : 0.05);
-    g.mat.waves.forEach((w, i) => (w.map!.offset.x = (t * 0.22 + i * 0.37) % 1));
-    for (const o of g.spin) o.rotation.y = -t * SPIN;
-  });
+  finishGear(stage, g);
 }
 
 /**

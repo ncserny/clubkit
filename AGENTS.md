@@ -14,6 +14,10 @@ Follow `.claude/skills/build-a-club/SKILL.md`. It is a plain Markdown file, writ
 
 Before building a fitting inside a venue, look in `src/kit/`. If it is something another club could use (a light, a speaker, a bar, a kind of furniture, a kind of person), add it to the kit and use it from there. A venue's own files hold only what that club alone has.
 
+## Share equipment, not character
+
+The clubs share what is the same in real life: DJ equipment, speaker cabinets, truss, rails, the people. They do not share what makes each of them itself: surfaces, layout, signs, lighting design, furniture with a look of its own. When moving something into the kit, ask whether two real clubs would have bought the same thing. If not, leave it in the venue.
+
 ## Guessed and measured
 
 A venue's `plan.ts` keeps what comes from a source in `MEASURED` and what is estimated in `GUESS`. Do not present a guess as a fact, in the plan or in the venue's copy.

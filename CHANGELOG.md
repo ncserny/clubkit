@@ -20,6 +20,8 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Changed
 
+- **Berghain: the booth's decks.** The four turntables and the mixer on the main floor are now the kit's DJ equipment, the same finely made pieces that stand in Ministry of Sound and Flex. The drum machine, the record crate and the DJ stay Berghain's own, as does everything else about the room: only the DJ equipment is shared between the clubs.
+- **Kit: `djPieces`** places single turntables, media players and mixers anywhere on a desk, for a booth that is not one of the two ready layouts. `DJ_SIZES` gives their sizes.
 - **Flex: the hall, from photographs.** The stage is a deck on legs between two black pillars that carry the speaker columns, with the mouths of two bass horns and a red RAUCHVERBOT ticker under each end. A ring of truss hangs low in front of it with a lens ball in the middle. The raised side is only the last stretch before the stage, with curved concrete steps at its corner, red tube handrails and two square columns chalked "Rauchen verboten" and "VIP". A wire mesh covers the upper inland wall under a silver duct. The hall is 4.3 m high, not 4.6.
 - **Flex: surfaces.** Plain colours are replaced by painted finishes: matt black masonry with tags, a pale worn screed, a dark polished floor in the café, quay paving, tiles, rippling water in the canal.
 - **Flex: light.** The matrix over the dance floor and the LED bars on the pillars run amber, as the club runs them. By day a working light is on in the hall and the café's tubes are lit.

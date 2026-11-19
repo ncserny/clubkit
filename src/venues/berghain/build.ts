@@ -7,6 +7,7 @@ import { setFigureDetail } from '../../engine/people';
 import { beamGeometry, beamMaterial, dustCloud } from '../../engine/fx';
 import { barrierGeometry, boxTruss, railLine as engineRailLine, steelStair } from '../../engine/props';
 import type { BuildContext, FrameState, VenueHooks } from '../../engine/types';
+import { makeMats, makeStages } from '../../kit';
 import { graffitiWall } from '../../kit/graffiti';
 import { buildBooth } from './booth';
 import {
@@ -883,8 +884,10 @@ export function build(ctx: BuildContext): VenueHooks {
   inner.add(blackMat, boxAt(-4.5, 5.7, -2.2, -3.7, 6.75, 2.2)); // the desk
   inner.add(steelMat, boxAt(-4.55, 6.75, -2.25, -3.65, 6.8, 2.25));
   const deckGlow = new THREE.MeshStandardMaterial({ color: '#000', emissive: new THREE.Color('#ff3a2a'), emissiveIntensity: 1.4 });
-  const booth = buildBooth();
-  group.add(booth.group);
+  // the kit's stage for the booth: its decks and mixer are the kit's
+  const stages = makeStages(ctx.quality, makeMats(ctx.quality));
+  const booth = buildBooth(stages.stage(group));
+  stages.finish();
   for (const [x, z] of PODIUMS) {
     inner.add(blackMat, boxAt(x - 1.2, 4.5, z - 1.2, x + 1.2, 5.1, z + 1.2));
     inner.add(steelMat, boxAt(x - 1.22, 5.08, z - 1.22, x + 1.22, 5.12, z + 1.22));
@@ -1239,9 +1242,12 @@ export function build(ctx: BuildContext): VenueHooks {
   let morning = false;
   let shutterOpen = 0;
 
-  function update({ dt, t, beat, bar, pulse, strobe, zone }: FrameState) {
+  function update(frame: FrameState) {
+    const { dt, t, beat, bar, pulse, strobe, zone } = frame;
     const inside = zone.inside;
     booth.update(t, beat);
+    // the club runs through Sunday morning: the decks stay on
+    stages.update(frame, true);
     const lit = inside || zone.id === 'doorstep';
     const inHall = rig.isOn('hall');
     if (dust) {

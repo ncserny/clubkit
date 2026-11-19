@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { canvasTexture } from '../../engine/util';
+import { djPieces, type Stage } from '../../kit';
 
 /**
- * The main-floor booth: four turntables, a rotary-style mixer and a drum
- * machine, and a DJ who works across all of it. The setup is a nod to the
+ * The main-floor booth: four turntables, a mixer and a drum machine, and a DJ
+ * who works across all of it. The turntables and the mixer are the kit's DJ
+ * equipment (kit/dj.ts), the same pieces that stand in the other clubs; the
+ * drum machine, the crate and the DJ are this booth's own. The setup is a nod to the
  * Detroit way of playing techno, fast, on many decks at once, with a drum
  * machine run live over the records. The figure is nobody in particular.
  *
@@ -17,45 +20,9 @@ const DECKS = [-1.5, -0.9, 1.0, 1.6];
 const MIXER_Z = -0.3;
 const DRUM_Z = 0.36;
 
-function recordTexture(hue: number) {
-  return canvasTexture(256, 256, (ctx, w, h) => {
-    ctx.fillStyle = '#060606';
-    ctx.fillRect(0, 0, w, h);
-    ctx.translate(w / 2, h / 2);
-    for (let r = 46; r < 124; r += 2) {
-      ctx.strokeStyle = `rgba(255,255,255,${r % 14 === 0 ? 0.0 : 0.035 + (r % 6) * 0.006})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    // a soft sheen across the grooves, so the spin reads
-    const g = ctx.createLinearGradient(-120, -120, 120, 120);
-    g.addColorStop(0.35, 'rgba(255,255,255,0)');
-    g.addColorStop(0.5, 'rgba(255,255,255,0.16)');
-    g.addColorStop(0.65, 'rgba(255,255,255,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(0, 0, 124, 0, Math.PI * 2);
-    ctx.arc(0, 0, 46, 0, Math.PI * 2, true);
-    ctx.fill();
-    // the label
-    ctx.fillStyle = `hsl(${hue},55%,42%)`;
-    ctx.beginPath();
-    ctx.arc(0, 0, 42, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillRect(-30, -16, 34, 5);
-    ctx.fillRect(-30, -6, 22, 3);
-    ctx.fillStyle = '#0a0a0a';
-    ctx.beginPath();
-    ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
-    ctx.fill();
-  });
-}
-
-export function buildBooth() {
+export function buildBooth(stage: Stage) {
   const group = new THREE.Group();
+  stage.group.add(group);
   const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number, parent: THREE.Object3D = group) => {
     const m = new THREE.Mesh(geo, mat);
     m.position.set(x, y, z);
@@ -65,77 +32,15 @@ export function buildBooth() {
     return m;
   };
 
-  const silver = new THREE.MeshStandardMaterial({ color: '#b9bbbd', roughness: 0.32, metalness: 0.85 });
   const dark = new THREE.MeshStandardMaterial({ color: '#1b1c1d', roughness: 0.5, metalness: 0.5 });
   const black = new THREE.MeshStandardMaterial({ color: '#080808', roughness: 0.7 });
   const rubber = new THREE.MeshStandardMaterial({ color: '#111', roughness: 0.95 });
   const red = new THREE.MeshStandardMaterial({ color: '#200', emissive: new THREE.Color('#ff2a1a'), emissiveIntensity: 3 });
-  const green = new THREE.MeshStandardMaterial({ color: '#020', emissive: new THREE.Color('#3dff7a'), emissiveIntensity: 2 });
-  const amber = new THREE.MeshStandardMaterial({ color: '#210', emissive: new THREE.Color('#ffb02a'), emissiveIntensity: 2 });
 
-  /* four turntables */
-  const records: THREE.Mesh[] = [];
-  const tonearms: THREE.Group[] = [];
-  DECKS.forEach((z, i) => {
-    const deck = new THREE.Group();
-    deck.position.set(DESK_X, DESK_Y, z);
-    group.add(deck);
-    add(new THREE.BoxGeometry(0.36, 0.07, 0.45), silver, 0, 0.035, 0, deck);
-    add(new THREE.BoxGeometry(0.37, 0.012, 0.46), dark, 0, 0.004, 0, deck); // feet shadow line
-    // platter with its strobe-dotted rim, a slipmat, the record
-    add(new THREE.CylinderGeometry(0.165, 0.165, 0.022, 48), silver, -0.01, 0.081, -0.045, deck);
-    add(new THREE.CylinderGeometry(0.168, 0.168, 0.008, 48, 1, true), dark, -0.01, 0.076, -0.045, deck);
-    add(new THREE.CylinderGeometry(0.15, 0.15, 0.003, 32), rubber, -0.01, 0.0935, -0.045, deck);
-    const rec = add(
-      new THREE.CircleGeometry(0.15, 48).rotateX(-Math.PI / 2),
-      new THREE.MeshStandardMaterial({ map: recordTexture([8, 205, 48, 0][i]), roughness: 0.28, metalness: 0.2 }),
-      -0.01,
-      0.0965,
-      -0.045,
-      deck,
-    );
-    rec.castShadow = false;
-    records.push(rec);
-    add(new THREE.CylinderGeometry(0.004, 0.004, 0.02, 8), silver, -0.01, 0.105, -0.045, deck);
-    // tonearm: pivot, S-shaped arm, counterweight, headshell
-    const arm = new THREE.Group();
-    arm.position.set(-0.12, 0.07, 0.16);
-    deck.add(arm);
-    add(new THREE.CylinderGeometry(0.022, 0.026, 0.05, 16), silver, 0, 0.025, 0, arm);
-    const tube = add(new THREE.CylinderGeometry(0.004, 0.004, 0.23, 8).rotateZ(Math.PI / 2), silver, 0.105, 0.052, 0, arm);
-    tube.castShadow = false;
-    add(new THREE.CylinderGeometry(0.015, 0.015, 0.035, 12).rotateZ(Math.PI / 2), dark, -0.03, 0.052, 0, arm);
-    add(new THREE.BoxGeometry(0.035, 0.008, 0.018), dark, 0.225, 0.048, 0, arm);
-    add(new THREE.BoxGeometry(0.012, 0.012, 0.012), black, 0.235, 0.04, 0, arm);
-    arm.rotation.y = 1.02; // resting over the record
-    tonearms.push(arm);
-    // pitch fader, start/stop, speed buttons, target light
-    add(new THREE.BoxGeometry(0.012, 0.004, 0.13), black, 0.14, 0.072, -0.02, deck);
-    add(new THREE.BoxGeometry(0.03, 0.012, 0.016), dark, 0.14, 0.078, -0.02 + (i - 1.5) * 0.02, deck);
-    add(new THREE.BoxGeometry(0.05, 0.008, 0.04), dark, 0.13, 0.074, -0.19, deck);
-    add(new THREE.BoxGeometry(0.008, 0.004, 0.008), red, 0.1, 0.073, -0.2, deck);
-    add(new THREE.CylinderGeometry(0.007, 0.007, 0.03, 8), silver, 0.16, 0.085, -0.13, deck);
-  });
-
-  /* the mixer: a black box of knobs, four channels and a meter */
-  const mixer = new THREE.Group();
-  mixer.position.set(DESK_X, DESK_Y, MIXER_Z);
-  group.add(mixer);
-  add(new THREE.BoxGeometry(0.38, 0.09, 0.32), dark, 0, 0.045, 0, mixer);
-  add(new THREE.BoxGeometry(0.36, 0.004, 0.3), black, 0, 0.092, 0, mixer);
+  /* four turntables and the mixer, from the kit: the desk runs along z and the DJ stands on its +x side, so the DJ's right is -z */
+  const desk = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0), new THREE.Vector3(1, 0, 0)).setPosition(DESK_X, DESK_Y, 0);
+  djPieces(stage, desk, [...DECKS.map((z, i) => ({ kind: 'turntable' as const, x: -z, hue: [8, 205, 48, 0][i] })), { kind: 'mixer', x: -MIXER_Z }]);
   const knob = new THREE.CylinderGeometry(0.011, 0.013, 0.02, 12);
-  for (let ch = 0; ch < 4; ch++) {
-    const z = -0.105 + ch * 0.07;
-    for (let k = 0; k < 4; k++) add(knob, k === 0 ? silver : rubber, -0.14 + k * 0.045, 0.104, z, mixer);
-    add(new THREE.BoxGeometry(0.1, 0.003, 0.006), rubber, 0.09, 0.094, z, mixer);
-    add(new THREE.BoxGeometry(0.014, 0.014, 0.022), silver, 0.07 + ((ch * 37) % 5) * 0.012, 0.1, z, mixer);
-  }
-  const meters: THREE.Mesh[] = [];
-  for (let k = 0; k < 10; k++) {
-    const m = add(new THREE.BoxGeometry(0.01, 0.003, 0.02), k > 7 ? red.clone() : k > 5 ? amber.clone() : green.clone(), -0.15 + k * 0.014, 0.095, 0.142, mixer);
-    m.castShadow = false;
-    meters.push(m);
-  }
 
   /* the drum machine: cream case, a row of sixteen step keys, a running light */
   const drum = new THREE.Group();
@@ -447,11 +352,9 @@ export function buildBooth() {
   const smooth = (x: number) => x * x * (3 - 2 * x);
 
   function update(t: number, beat: number) {
-    records.forEach((r, i) => (r.rotation.y = -t * ((33.33 / 60) * Math.PI * 2) * (i === 1 ? 1.03 : i === 2 ? 0.985 : 1)));
     const step = Math.floor(beat * 4) % 16;
     runner.position.z = stepZ(step < 0 ? step + 16 : step);
     const pulse = Math.pow(1 - (((beat % 1) + 1) % 1), 2);
-    meters.forEach((m, k) => (m.visible = k < 3 + pulse * 7));
 
     // move along the desk every four bars
     const phase = (((beat / 16) % stations.length) + stations.length) % stations.length;

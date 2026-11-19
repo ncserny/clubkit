@@ -65,7 +65,7 @@ Everything in `src/kit/` is exported from `src/kit/index.ts`.
 
 | Group | Components |
 |---|---|
-| DJ equipment | `djBooth` (a desk with the gear on it), `djGear` (media players, mixer, turntables, in the `full` or `cdjs` layout). Screens scroll and platters turn with the music. |
+| DJ equipment | `djBooth` (a desk with the gear on it), `djGear` (media players, mixer, turntables, in the `full` or `cdjs` layout), `djPieces` (the same pieces placed one by one, as in Berghain's booth of four turntables). All three clubs use this equipment. Screens scroll and platters turn with the music. |
 | Lighting | `movingHeads` (fixtures that swing beams through the haze), `mirrorBall`, `strobe`, `parCan`, `ledScreen`, `swirlScreen`, `playScreens` |
 | Sound | `speakerStack`, `speakerCabinet` |
 | People | `dancers`, `talkers`, `bouncer`, `doorStaff`, `dj`, `queue`, `group`, `person`, and the `WARDROBE` presets |

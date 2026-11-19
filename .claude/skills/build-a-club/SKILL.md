@@ -37,7 +37,7 @@ Use the most capable model you have. These venues were built with Claude Fable 5
 | Outdoors | `tree`, `lampPost`, `bollard`, `graffitiWall` |
 | Anything else | `box`, `along`, `cyl`, `tube`, `panel`, `prism` from `kit/shapes.ts` |
 
-If you build something another club could use, put it in `src/kit/`, export it from `kit/index.ts`, and use it from there.
+If you build something another club could use, put it in `src/kit/`, export it from `kit/index.ts`, and use it from there. But share equipment, not character: decks, cabinets and truss are the same in every club, while surfaces, signs, layout and the lighting design are what make a club itself and stay in the venue. For a booth that is not one of the ready layouts, place the pieces one by one with `djPieces` (see Berghain's booth).
 
 ## What makes it look real
 
