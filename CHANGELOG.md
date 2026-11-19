@@ -13,6 +13,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 - **Flex: toilets, cloakroom, seating.** Toilets with the wall of sweets, a cloakroom counter with coats, people sitting on the café's sofas, at its bar and at the picnic tables in the garden.
 - **Kit:** `tree`, `bollard`, `lampPost`, `stool`, and `prism` (a slab over any outline, for curved steps and counters that are not square).
 - **Start page: who made each model.** Each card names the model's maker (Berghain and Flex by Nader Cserny, Ministry of Sound by Tim Huckle), and under the cards a line links to this repository: "Open source. Build your own club experience with Club Kit".
+- **Credits:** the README names who made each model: Berghain and Flex by Nader Cserny, Ministry of Sound by Tim Huckle.
 - **A skill for building a club**, shared by every agent that works here: `.claude/skills/build-a-club/SKILL.md`, linked from `AGENTS.md` and `CLAUDE.md`. It gives the order to work in, the kit component for each job, what makes a room look real, and how to check the result.
 - **A walk test for any venue:** `tools/test/route.mjs` walks the routes in a JSON file and checks that what should stop a walker does. `tools/test/routes/flex.json` is Flex's.
 - `AGENTS.md`, with the rules for working in this repository, and this changelog.

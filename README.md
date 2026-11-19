@@ -279,6 +279,7 @@ Not affiliated with Berghain.
 
 ## Credits
 
+- Models: Berghain and Flex by Nader Cserny, Ministry of Sound by Tim Huckle.
 - Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, under the Open Database License. Keep this credit visible wherever a venue's `osm.json` or anything derived from it is shown.
 - Rendering: [Three.js](https://threejs.org/) r186.
 - The booth on Berghain's main floor is a homage to Jeff Mills, and the booth in Flex's hall to Electric Indigo. The DJ figures depict nobody in particular.
