@@ -66,7 +66,7 @@ To put the built site on a site of your own, tell the build where it will live. 
 | Arrow left and right | Turn |
 | Shift | Move faster |
 | Q, E | Fly up and down, out of doors only |
-| Wheel | Move along the view; indoors it stays on the floor |
+| Wheel | Walk along the view. In the air (after Q, or from a viewpoint above) it climbs and dives instead |
 | 1 to 9 (0 to 9 in Ministry of Sound) | Jump to a viewpoint |
 | L | Next time of day |
 | M | Sound on or off |

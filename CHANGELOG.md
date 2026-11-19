@@ -41,6 +41,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Fixed
 
+- **Engine: the wheel no longer lifts a walker into the air.** Out of doors, scrolling toward a building while looking up at it climbed without end once the wall stopped the walk, and left the visitor hovering high over the scene. Someone standing on the ground now walks with the wheel, indoors and out; only someone already in the air (Q, or a viewpoint above) climbs and dives with it. E no longer drops to street level where there is no floor underneath. The route test can check this (`grounded` entries), and Flex's does.
 - The README no longer carries a stale second copy of itself below the credits.
 - **Engine:** in a room sunk below the street, the street's ground no longer held a walker up or lifted them to street level while they crossed a thick wall.
 - **Engine:** a doorway through a thick wall now counts as part of the room it leads into, so light and sound no longer flick to "outdoors" in the doorway.

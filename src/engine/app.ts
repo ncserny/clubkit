@@ -10,7 +10,7 @@ import { setAnisotropy } from './util';
 import { buildWorld, type View, type World } from './world';
 import { audioState, audioTime, isMuted, measureLoop, setInside, setMuted, setRoomTone, setTempo, startAudio, tempoOf } from './audio';
 import { applyCopy } from './copy';
-import { EYE } from './nav';
+import { EYE, STEP } from './nav';
 import type { VenueModule } from './types';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
@@ -290,18 +290,18 @@ export async function start(venue: VenueModule) {
       const lad = nav.ladderAt(pos);
       if (lad && pos.y - EYE > lad.bottom + 0.15) return; // hands on the rungs
       // along the ground it is a walk like any other: walls and furniture stop it
+      const before = pos.y;
       const at = nav.move(pos, next);
       pos.x = at.x;
       pos.z = at.z;
-      if (z.inside) {
-        const floor = nav.floorAt(pos);
-        if (floor !== null) pos.y = floor + EYE;
-      } else {
-        // out of doors the wheel also climbs and dives, down to whatever is underneath
-        pos.y = next.y;
-        const floor = nav.floorAt(pos);
-        pos.y = Math.max(pos.y, (floor ?? 0) + EYE);
-      }
+      const floor = nav.floorAt(pos);
+      // Someone standing on the ground walks with the wheel, indoors and out: looking up at a
+      // building and scrolling toward it must not lift them off the quay. Only someone already
+      // in the air (Q, or an aerial viewpoint) climbs and dives with it, down to whatever is
+      // underneath. Where there is no floor to be found, the height is left alone.
+      const airborne = !z.inside && floor !== null && before - EYE - floor > STEP;
+      if (floor === null) return;
+      pos.y = airborne ? Math.max(next.y, floor + EYE) : floor + EYE;
     },
     { passive: false },
   );
@@ -690,7 +690,9 @@ export async function start(venue: VenueModule) {
       // Q and E fly, out of doors only: indoors there is a ceiling. E comes down to whatever is underneath.
       if (!zone.inside && !onLadder) {
         if (keys.has('q')) pos.y += dt * 8;
-        if (keys.has('e')) pos.y = Math.max((nav.floorAt(pos) ?? 0) + EYE, pos.y - dt * 8);
+        // down to the floor underneath; where there is none, no lower than here
+        const under = nav.floorAt(pos);
+        if (keys.has('e') && under !== null) pos.y = Math.max(under + EYE, pos.y - dt * 8);
       }
       // Before anyone touches anything, the aerial view drifts slowly round the block.
       if (!begun && current.id === world.viewpoints[0].id) {
