@@ -6,6 +6,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Added
 
+- **README: what it looks like.** Screenshots of the three clubs (two of Berghain and Ministry of Sound, three of Flex) in `docs/screenshots/`, and the YouTube walkthrough of Berghain.
 - **Contributing by pull request.** `CONTRIBUTING.md` says how to add a club or a component, what a new club's pull request needs, and what the license means for a contribution. Pull requests start from a template with the checks to run. `main` takes changes by pull request only.
 - **Pages that read without JavaScript.** The build writes the chooser's cards into the start page, and each venue's name, city and opening line into its own page, so search engines and link previews see real text.
 - **Hosting the build on a site of your own.** The build reads four optional settings: `SITE_URL` and `SHARE_IMAGE` add a canonical link and link-preview tags to the start page and to every venue's page, and `VITE_SITE_NAME` with `VITE_SITE_HOME` put a small link back to your site on the start page.
