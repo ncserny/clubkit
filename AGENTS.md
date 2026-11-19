@@ -1,0 +1,29 @@
+# Club Kit
+
+A framework (`src/engine/`), a components library (`src/kit/`) and venues (`src/venues/<id>/`) for walkable 3D clubs in the browser. The README explains each layer.
+
+## Changelog
+
+**Every change updates `CHANGELOG.md` in the same commit.** It follows Keep a Changelog: newest first, grouped under Added, Changed, Fixed and Removed, written for someone who uses the repository, not as a list of commits. Say which layer a change is in: the engine, the kit, or a named venue.
+
+## Components first
+
+Before building a fitting inside a venue, look in `src/kit/`. If it is something another club could use (a light, a speaker, a bar, a kind of furniture, a kind of person), add it to the kit and use it from there. A venue's own files hold only what that club alone has.
+
+## Guessed and measured
+
+A venue's `plan.ts` keeps what comes from a source in `MEASURED` and what is estimated in `GUESS`. Do not present a guess as a fact, in the plan or in the venue's copy.
+
+## Checks before a push
+
+- `npm run typecheck` and `npm run build`.
+- A change to the engine or the kit must not change a venue by accident: render before and after with `tools/test/render.mjs` and compare with `tools/test/compare.mjs` (see Tests in the README).
+- Walk the venue that changed: `tools/test/navtest.mjs` (Berghain), `tools/test/moswalk.mjs` (Ministry of Sound).
+
+## Not ours
+
+Club names, artists' names, the Ministry of Sound crest and the Flex logo belong to their owners and are not covered by the repository's license. Posters, graffiti and murals in the models are invented, never copied from the real ones.
+
+## Writing
+
+No em dashes in copy, comments, commit messages or docs.

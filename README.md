@@ -12,7 +12,7 @@ It comes in three layers:
 |---|---|---|
 | Ministry of Sound, London | `mos` (the default) | Fully dressed |
 | Berghain, Berlin | `berghain` | Fully dressed |
-| Flex, Vienna | `flex` | First pass: measured and fitted out from the kit, surfaces still plain |
+| Flex, Vienna | `flex` | Dressed: fitted out from the kit, surfaces painted from the club's photographs of its empty rooms |
 
 There are no model files. Every shape and texture is generated in code when the page loads. Each venue brings one data file, its surroundings from OpenStreetMap.
 
@@ -72,6 +72,7 @@ Everything in `src/kit/` is exported from `src/kit/index.ts`.
 | Structure | `railing`, `trussLeg`, `trussRun`, `openStair`, `openLeaves`, `barrierLine` |
 | Furniture | `barCounter`, `sofa`, `bottles` |
 | Finishes | `makeMats` (plain materials), `graffitiWall` |
+| Outdoors | `tree`, `bollard`, `lampPost`, `stool` |
 | Shapes | `box`, `along`, `cyl`, `tube`, `panel`, `quad4` |
 
 Geometry components are drawn onto a **stage**: a group in the scene, a batch that merges solid parts by material, the materials, and hooks for the beat and the time of day. Coordinates are metres, `[x, z]` on the floor and `y` up.
@@ -227,7 +228,7 @@ Not affiliated with Ministry of Sound. The name and the crest are the club's and
 
 ## Flex: coordinates and what is guessed
 
-`venues/flex/` is a first pass at Flex, Augartenbrücke 1, Vienna, built from `docs/flex-research.md`. That file marks every fact as sourced or guessed, and `plan.ts` keeps the same split in `MEASURED` and `GUESS`.
+`venues/flex/` is Flex, Augartenbrücke 1, Vienna, built from `docs/flex-research.md` and from photographs of the hall with nobody in it. That file marks every fact as sourced or guessed, and `plan.ts` keeps the same split in `MEASURED` and `GUESS`.
 
 **Frame.** The origin is the north-west end of the club's frontage on the quay wall. x runs along the wall downstream, toward the stage; z is negative toward the Donaukanal and positive inland, under the road. y is up from the street, so the quay is at about -6.5 and the water below that.
 
@@ -235,7 +236,9 @@ Not affiliated with Ministry of Sound. The name and the crest are the club's and
 
 **Measured.** From the club's own technical drawings: the stage (1.02 m high, 5.7 m wide), the speaker columns 4.88 m apart, the mixing desk 7.86 m from the stage, the 5 by 3 m LED wall, the 19 by 8 grid of spots.
 
-**Guessed.** The length and height of the hall, the height of the street above the quay, where the door, the cashier and the bars are, and how the café and the hall lie against each other.
+**From photographs.** The stage stands between two black pillars that carry the speaker columns, with the mouths of two bass horns open under its deck and a red ticker over each. A ring of truss hangs low in front of it with a lens ball in the middle. The raised side is only the last stretch before the stage, with curved concrete steps at its corner, red tube handrails, and two square columns chalked "Rauchen verboten" and "VIP". A wire mesh covers the upper part of the inland wall under a silver duct. `textures.ts` paints the surfaces: matt black masonry with tags, a pale worn screed, quay paving, tiles, and the wall of sweets in the toilets.
+
+**Guessed.** The length of the hall, the height of the street above the quay, where the door, the cashier, the cloakroom and the toilets are, and how the café and the hall lie against each other.
 
 **Who is playing.** The booth in the hall is a homage to Electric Indigo. The figure is the same figure as everyone else, and the techno is synthesised, not hers.
 

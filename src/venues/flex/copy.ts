@@ -7,7 +7,8 @@ export const TEXT = {
   rooms: {
     hall: 'A closed-off stretch of the old Stadtbahn gallery under the Franz-Josefs-Kai, the club since 1995. Black walls, a flat ceiling of beams and ducts, a dance strip on one side and a raised side with the bar and the mixing desk on the other.',
     cafe: 'The pavilion built in front of the hall in 2007: a low red ceiling, a bar, steps to sit on along the canal side and a small stage at the far end.',
-    foyer: 'Cashier on the left, the café ahead, the hall through the old quay wall.',
+    foyer: 'Cashier on the left, the cloakroom on the right, the café ahead, the hall through the old quay wall.',
+    wc: 'The toilets are known for one wall, the Zuckerlwand: sweets from floor to ceiling.',
     quay: 'The lower quay of the Donaukanal, six or seven metres below the street. The walls along here have been a legal place to spray since 1994.',
   },
   views: {
@@ -33,7 +34,7 @@ export const copy: Copy = {
   start: 'Go down to the canal',
   hintKeys: 'Drag to look · WASD to walk · 1 to 9 for viewpoints · L for daytime',
   hintTouch: 'Drag to look · the joystick walks · tap a viewpoint below',
-  credit: `A first pass: measured, not yet fully dressed. ${OSM}`,
+  credit: OSM,
   aboutHeading: 'About this model',
   about: [
     '<p>Flex is a club on the lower quay of the Donaukanal in Vienna, at the foot of the Augartenbrücke. It opened here on 1 October 1995, in a disused section of the gallery the Stadtbahn was built in, after five years in Meidling. This page models it in the browser with Three.js, with no photographs or model files.</p>',
@@ -45,14 +46,14 @@ export const copy: Copy = {
     '<p>Nine viewpoints: the bridge, the steps, the door, the café, the hall, the dance floor, the mixing desk, the booth and the far bank. A link can open on any of them, for example <a href="?venue=flex&amp;view=floor">the dance floor</a>.</p>',
   ],
   infoTitle: 'Flex in 3D',
-  infoMeta: '2026. Code, map data, synthesised sound. Runs in a browser. A first pass.',
+  infoMeta: '2026. Code, map data, synthesised sound. Runs in a browser.',
   info: [
     'Flex is built from the same kit as the other clubs here: the decks, the speaker stacks, the moving lights, the strobes, the mirror ball, the bar, the dancers and the people on the door are parts that any venue can use.',
     'The building is half underground. The street runs along the top of the quay wall, and the hall lies behind that wall, under the road, in a stretch of the gallery that the Stadtbahn ran through from 1901. The underground still passes on the other side of the hall’s inner wall.',
     'The hall is laid out from the club’s own stage plot and lighting plan. Its length, its height and the place of the bar are estimates. The café pavilion in front of it, built in 2007, is drawn on the outline the map gives it.',
     'The walls of the quay are sprayed from end to end, as they are: this stretch of the canal has been a legal wall since 1994. The graffiti here is invented and spells nothing.',
     'On the decks in the hall: Electric Indigo, the Viennese DJ and producer who founded female:pressure. The booth is a homage to her; the figure behind it is the same figure as everyone else in the room, and the techno is synthesised on the spot, not hers. The café plays house.',
-    'This is a first pass. The rooms are measured and the fittings are in place, but most surfaces are still plain.',
+    'The surfaces are painted in code from what the club’s photographs of its empty rooms show: matt black masonry tagged all over, a worn screed floor, a wire mesh down one long wall, a ceiling of beams and silver ducts, a red ceiling in the café, and in the toilets the wall of sweets.',
   ],
   infoFoot: `Not affiliated with Flex or with Electric Indigo. ${OSM}. Built with Three.js and Club Kit.`,
   loaderNote: 'Nothing is downloaded as a model. The building is being generated on your device.',

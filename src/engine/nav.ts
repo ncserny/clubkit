@@ -238,7 +238,7 @@ export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], 
     return y;
   }
 
-  function supportsAt(wx: number, wz: number, ref: number): Support[] {
+  function supportsAt(wx: number, wz: number, ref: number, flying = false): Support[] {
     const [lx, lz] = frame.localXZ(wx, wz);
     const out: Support[] = [];
     for (const s of surfaces) {
@@ -246,8 +246,9 @@ export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], 
       const y = s.floor(lx, lz);
       if (Math.abs(y - ref) < STEP) out.push({ s, y });
     }
+    // the ground holds up a walker only where it is underfoot: not from a room sunk below the street
     const g = groundAt(wx, wz, lx, lz, ref);
-    if (g !== null) out.push({ s: outside, y: g });
+    if (g !== null && (flying || Math.abs(g - ref) < STEP)) out.push({ s: outside, y: g });
     return out;
   }
 
@@ -273,14 +274,14 @@ export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], 
    * `ref` is the floor at a for a walker, the height of the feet for someone in the air.
    */
   function step(ax: number, az: number, bx: number, bz: number, ref: number, flying: boolean): number | null {
-    const sb = supportsAt(bx, bz, ref);
+    const sb = supportsAt(bx, bz, ref, flying);
     if (!sb.length) return null;
-    const sa = supportsAt(ax, az, ref);
+    const sa = supportsAt(ax, az, ref, flying);
     // somebody who is somehow standing nowhere is let out
     const centre = sa.length ? sb.filter((b) => sa.some((a) => compatible(a.s, b.s))) : sb;
     if (!centre.length) return null;
     for (const [dx, dz] of RING) {
-      const ss = supportsAt(bx + dx, bz + dz, ref);
+      const ss = supportsAt(bx + dx, bz + dz, ref, flying);
       if (!ss.some((s) => centre.some((c) => compatible(c.s, s.s)))) return null;
     }
     let floor = -Infinity;
@@ -301,8 +302,9 @@ export function buildNav(plan: VenuePlan, frame: VenueFrame, solidsIn: Solid[], 
       const y = s.floor(lx, lz);
       if (y <= feet + STEP && (best === null || y > best)) best = y;
     }
+    // the ground counts only where it is underfoot, not the street above a sunken room
     const g = groundAt(p.x, p.z, lx, lz, feet);
-    if (g !== null && (best === null || g > best)) best = g;
+    if (g !== null && g <= feet + STEP && (best === null || g > best)) best = g;
     return best;
   }
 

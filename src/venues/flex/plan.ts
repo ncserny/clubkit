@@ -43,7 +43,7 @@ export const GUESS = {
   /** The hall: its width is scaled from the plan, its length and height are estimates. */
   hallWidth: 10.5,
   hallLength: 40,
-  hallHeight: 4.6,
+  hallHeight: 4.3,
   /** The dance strip on the inland side; the raised side of the hall takes the rest. */
   danceWidth: 5.8,
   platformRise: 0.45,
@@ -71,12 +71,22 @@ export const HALL = { x0: 2, x1: 2 + GUESS.hallLength, z0: W, z1: W + GUESS.hall
 export const SPLIT = HALL.z1 - GUESS.danceWidth;
 export const STAGE = { x0: HALL.x1 - MEASURED.stageZone, x1: HALL.x1 - MEASURED.stageZone + MEASURED.stageDepth, z0: SPLIT + 0.05, z1: HALL.z1 - 0.05, y: Q + MEASURED.stageHeight };
 export const STAGE_MID = (STAGE.z0 + STAGE.z1) / 2;
-export const FOH = { x: STAGE.x0 - MEASURED.foh, z: SPLIT - 1.2 };
+export const FOH = { x: STAGE.x0 - MEASURED.foh, z: SPLIT - 0.5 };
+/** Where the raised side begins: it is only the last stretch of the hall before the stage (the club's photographs). */
+export const PLATFORM_X = 27;
+/** The bay of the raised side's edge that has steps down to the dance floor, between red handrails. */
+export const STEP_BAY = [30.6, 32.6] as const;
+/** The two pillars the stage stands between, which carry the speaker columns: centre z, and half their width. */
+export const PILLARS = [STAGE_MID - MEASURED.mainsApart / 2, STAGE_MID + MEASURED.mainsApart / 2];
+export const PILLAR = { half: 0.375, depth: 0.6 };
 export const FOYER = { x0: 1, x1: 8.4, z0: -GUESS.foyerDepth - 0.3, z1: -0.3 };
 export const CAFE = { x0: 8.9, x1: 36, z0: -GUESS.cafeDepth - 0.3, z1: -0.3 };
 export const CAFE_STAGE = { x0: CAFE.x1 - MEASURED.cafeStage, x1: CAFE.x1, z0: -7, z1: -3, y: Q + 0.6 };
 /** The backstage shed at the downstream end of the frontage: seen from outside only. */
 export const SHED = { x0: 36.3, x1: MEASURED.frontage, z0: -4, z1: -0.3 };
+/** The toilets, in the shed at the stage end of the frontage: reached from the raised side of the hall, a step down. */
+export const WC = { x0: SHED.x0 + 0.3, x1: SHED.x1 - 0.3, z0: SHED.z0 + 0.1, z1: -0.4 };
+export const CUBICLES = [41.5, 42.6, 43.7, 44.8, 45.9, 47, 48.1];
 /** The garden on the quay, toward the bridge. */
 export const GARDEN: Rect = [-40, -15, -3, -2.5];
 
@@ -95,6 +105,16 @@ export const RIGHT_EDGE: Pt[] = [[-400, -185], [-340, -127.6], [-300.8, -93.7], 
 export const LEFT_EDGE: Pt[] = [[-400, -240], [-357.5, -198.4], [-295.3, -147.8], [-230.9, -105.1], [-195.6, -90.4], [-140.9, -78.8], [-95.1, -79.1], [107.7, -77.6], [145.9, -73.2], [185.8, -65.6], [241.7, -49.2], [290.2, -28.6], [341.6, -4.4], [420, 32.3]];
 export const LEFT_WALL: Pt[] = [[-400, -262], [-357, -215], [-295, -165], [-231, -122], [-196, -107], [-141, -96], [108, -96], [146, -90], [186, -82.5], [242, -66], [290, -45.5], [342, -21.5], [420, 15]];
 
+/** The ways through the walls, as rectangles on the floor. Each also counts as part of the room it leads into, so that nobody is out of doors while crossing the old quay wall. */
+const WAYS = {
+  door: [GUESS.door[0], FOYER.z0 - 0.5, GUESS.door[1], FOYER.z0 + 0.3] as Rect,
+  foyerCafe: [FOYER.x1 - 0.3, -5.2, CAFE.x0 + 0.3, -2.8] as Rect,
+  foyerHall: [3.2, FOYER.z1 - 0.3, 5.8, HALL.z0 + 0.3] as Rect,
+  cafeHall: [20, CAFE.z1 - 0.3, 22, HALL.z0 + 0.3] as Rect,
+  hallWc: [38.3, WC.z1 - 0.3, 39.7, HALL.z0 + 0.3] as Rect,
+};
+const through = (...ways: Rect[]) => ways.map((area) => ({ area, y0: Q, y1: Q + GUESS.doorHeight + 0.5 }));
+
 const caption = (title: string, text: string) => ({ title, text });
 const V = (x: number, z: number, y: number): Vec3 => [x, y, z];
 const NIGHT = ['night'];
@@ -108,6 +128,7 @@ const rooms: Room[] = [
     level: Q,
     height: GUESS.hallHeight,
     areas: [[HALL.x0, HALL.z0, HALL.x1, HALL.z1]],
+    also: through(WAYS.foyerHall, WAYS.cafeHall, WAYS.hallWc),
     zone: { inside: true, music: 1, loudness: 1, track: 'techno', exposure: 1.05, speed: 2.6, haze: { default: 0.03, day: 0.006 }, fog: '#0b0a10', lightSets: ['hall'], echo: 0.5 },
     caption: caption('The hall', TEXT.rooms.hall),
     colours: BLACK,
@@ -118,6 +139,7 @@ const rooms: Room[] = [
     level: Q,
     height: GUESS.cafeHeight,
     areas: [[CAFE.x0, CAFE.z0, CAFE.x1, CAFE.z1]],
+    also: through(WAYS.foyerCafe),
     zone: { inside: true, music: 0.85, loudness: 0.6, track: 'house', exposure: 1.1, speed: 2.8, haze: { default: 0.014, day: 0.004 }, fog: '#12080a', lightSets: ['cafe'], echo: 0.2 },
     caption: caption('Flex Café', TEXT.rooms.cafe),
     colours: { floor: '#6f6b66', walls: '#161416', ceiling: '#5a1216' },
@@ -128,9 +150,20 @@ const rooms: Room[] = [
     level: Q,
     height: GUESS.cafeHeight,
     areas: [[FOYER.x0, FOYER.z0, FOYER.x1, FOYER.z1]],
+    also: through(WAYS.door),
     zone: { inside: true, music: 0.35, loudness: 0.55, track: 'techno', exposure: 1.1, speed: 2.8, haze: 0.006, fog: '#0d0c10', lightSets: ['foyer'], echo: 0.15 },
     caption: caption('The door', TEXT.rooms.foyer),
     colours: { floor: '#6f6b66', walls: '#18181a', ceiling: '#101012' },
+  },
+  {
+    id: 'wc',
+    name: 'The toilets',
+    level: Q,
+    height: 2.8,
+    areas: [[WC.x0, WC.z0, WC.x1, WC.z1]],
+    zone: { inside: true, music: 0.3, loudness: 0.6, track: 'techno', exposure: 1.05, speed: 2.6, haze: 0.004, fog: '#101214', lightSets: ['wc'], echo: 0.6 },
+    caption: caption('The toilets', TEXT.rooms.wc),
+    colours: { floor: '#5a5d5e', walls: '#d8dad6', ceiling: '#1a1b1c' },
   },
   {
     id: 'quay',
@@ -189,11 +222,13 @@ const rooms: Room[] = [
 
 /* ------------------------------------------------------- ways through ---- */
 const links: Link[] = [
-  { id: 'door', from: 'quay', to: 'foyer', area: [GUESS.door[0], FOYER.z0 - 0.5, GUESS.door[1], FOYER.z0 + 0.3], level: Q, height: GUESS.doorHeight },
-  { id: 'foyer-cafe', from: 'foyer', to: 'cafe', area: [FOYER.x1 - 0.3, -5.2, CAFE.x0 + 0.3, -2.8], level: Q, height: GUESS.doorHeight },
-  { id: 'foyer-hall', from: 'foyer', to: 'hall', area: [3.2, FOYER.z1 - 0.3, 5.8, HALL.z0 + 0.3], level: Q, height: GUESS.doorHeight },
+  { id: 'door', from: 'quay', to: 'foyer', area: WAYS.door, level: Q, height: GUESS.doorHeight },
+  { id: 'foyer-cafe', from: 'foyer', to: 'cafe', area: WAYS.foyerCafe, level: Q, height: GUESS.doorHeight },
+  { id: 'foyer-hall', from: 'foyer', to: 'hall', area: WAYS.foyerHall, level: Q, height: GUESS.doorHeight },
+  // beside the stage, through the quay wall and a step down
+  { id: 'hall-wc', from: 'hall', to: 'wc', area: WAYS.hallWc, level: Q + GUESS.platformRise, height: 2.1 },
   // further down the wall, a second way between the café and the hall's raised side
-  { id: 'cafe-hall', from: 'cafe', to: 'hall', area: [20, CAFE.z1 - 0.3, 22, HALL.z0 + 0.3], level: Q, height: GUESS.doorHeight },
+  { id: 'cafe-hall', from: 'cafe', to: 'hall', area: WAYS.cafeHall, level: Q, height: GUESS.doorHeight },
 ];
 
 const stairs: Stair[] = [
@@ -216,8 +251,8 @@ const stairs: Stair[] = [
 ];
 
 const platforms: Platform[] = [
-  // the raised side of the hall, toward the canal: the bar, the mixing desk, the way to the stage
-  { id: 'hall-side', room: 'hall', area: [9, HALL.z0, HALL.x1, SPLIT], level: Q + GUESS.platformRise },
+  // the raised side of the hall, toward the canal, before the stage: the mixing desk, the way to the stage and the toilets
+  { id: 'hall-side', room: 'hall', area: [PLATFORM_X, HALL.z0, HALL.x1, SPLIT], level: Q + GUESS.platformRise },
   { id: 'stage', room: 'hall', area: [STAGE.x0, STAGE.z0 - 0.05, HALL.x1, HALL.z1], level: STAGE.y },
   { id: 'cafe-stage', room: 'cafe', area: [CAFE_STAGE.x0, CAFE_STAGE.z0, CAFE_STAGE.x1, CAFE_STAGE.z1], level: CAFE_STAGE.y },
   // the stepped seating in the café: two low tiers along the canal side
@@ -225,25 +260,49 @@ const platforms: Platform[] = [
   { id: 'cafe-tier-2', room: 'cafe', area: [12, CAFE.z0, 30, CAFE.z0 + 1.3], level: Q + 0.6 },
 ];
 
-/** Columns along the edge of the raised side, one every five metres. */
-export const COLUMNS: Pt[] = [12, 17, 22, 27, 32].map((x): Pt => [x, SPLIT - 0.25]);
+/** The two square columns on the edge of the raised side, 0.9 m across: one at its corner, one nearer the stage. */
+export const COLUMN = 0.45;
+export const COLUMNS: Pt[] = [PLATFORM_X + COLUMN, 33.65].map((x): Pt => [x, SPLIT - COLUMN]);
+/** The edge of the raised side between the second column and the stage has a rail. */
+export const RAILS: [Pt, Pt][] = [[[33.65 + COLUMN, SPLIT - 0.05], [STAGE.x0 - 1.1, SPLIT - 0.05]]];
+export const MERCH: Rect = [30.3, HALL.z0 + 0.15, 32.1, HALL.z0 + 0.85];
+/** The cloakroom counter: from the canal-side wall of the foyer, out, and across to the café's wall. */
+export const CLOAK: Pt[] = [
+  [6.3, FOYER.z0],
+  [6.3, FOYER.z0 + 2],
+  [FOYER.x1, FOYER.z0 + 2],
+];
+/** The bar, on the canal side of the hall where it is still at floor level, on a low plinth. */
 export const HALL_BAR: [Pt, Pt] = [
-  [9.6, HALL.z0 + 1.5],
-  [18.6, HALL.z0 + 1.5],
+  [11, HALL.z0 + 1.5],
+  [19, HALL.z0 + 1.5],
 ];
 export const CAFE_BAR: [Pt, Pt] = [
   [18.5, CAFE.z1 - 1.5],
   [10.5, CAFE.z1 - 1.5],
 ];
+/** Stools along the café bar, on the guests' side. */
+export const STOOLS: Pt[] = [11.2, 12.2, 13.2, 14.2, 15.2, 16.2, 17.2].map((x): Pt => [x, CAFE_BAR[0][1] - 0.55]);
+/** The picnic tables in the garden. */
+export const TABLES: Pt[] = [0, 1, 2, 3, 4, 5].map((i): Pt => [GARDEN[0] + 4 + (i % 3) * 11, i < 3 ? GARDEN[1] + 2.5 : GARDEN[1] + 6.5]);
 export const DESK: Rect = [STAGE.x0 + 0.5, STAGE_MID - 1.3, STAGE.x0 + 1.3, STAGE_MID + 1.3];
 
 const obstacles: Obstacle[] = [
-  ...COLUMNS.map(([x, z]): Obstacle => ({ label: 'column', circle: [x, z, 0.22], y0: Q, y1: Q + GUESS.hallHeight, draw: '#0e0e10' })),
+  ...COLUMNS.map(([x, z]): Obstacle => ({ label: 'column', rect: [x - COLUMN, z - COLUMN, x + COLUMN, z + COLUMN], y0: Q, y1: Q + GUESS.hallHeight, draw: '#0e0e10' })),
+  // the stage's two pillars, with the speaker columns on their fronts
+  ...PILLARS.map((z): Obstacle => ({ label: 'pillar', rect: [STAGE.x0 - PILLAR.depth, z - PILLAR.half, STAGE.x0, z + PILLAR.half], y0: Q, y1: Q + GUESS.hallHeight, draw: '#0e0e10' })),
+  ...PILLARS.map((z): Obstacle => ({ label: 'speaker column', rect: [STAGE.x0 - PILLAR.depth - 0.45, z - 0.32, STAGE.x0 - PILLAR.depth, z + 0.32], y0: Q + 0.5, y1: Q + 4.1, draw: false })),
+  // red handrails along the edge of the raised side, in two of the bays between the columns
+  ...RAILS.map(([a, b]): Obstacle => ({ label: 'rail', path: [a, b], width: 0.08, y0: Q, y1: Q + GUESS.platformRise + 1.05, draw: false })),
+  { label: 'merch table', rect: MERCH, y0: Q, y1: Q + GUESS.platformRise + 0.8, draw: false },
+  // the cloakroom: a counter across the corner of the foyer
+  { label: 'cloakroom counter', path: [CLOAK[0], CLOAK[1], CLOAK[2]], width: 0.45, y0: Q, y1: Q + 1.1, draw: false },
+  // the toilets: cubicles along the canal side, a trough of basins at the far end
+  ...CUBICLES.map((x): Obstacle => ({ label: 'cubicle', path: [[x, WC.z0], [x, WC.z0 + 1.5]], width: 0.05, y0: Q + 0.15, y1: Q + 2.1, draw: false })),
+  { label: 'basins', rect: [WC.x1 - 0.55, WC.z0 + 0.4, WC.x1, WC.z1 - 0.4], y0: Q, y1: Q + 0.9, draw: false },
   { label: 'hall bar', rect: [HALL_BAR[0][0], HALL.z0, HALL_BAR[1][0], HALL_BAR[0][1] + 0.1], y0: Q, y1: Q + 1.6, draw: false },
-  { label: 'mixing desk', rect: [FOH.x - MEASURED.fohWidth / 2, FOH.z - 0.5, FOH.x + MEASURED.fohWidth / 2, FOH.z + 0.5], y0: Q, y1: Q + 1.7, draw: false },
+  { label: 'mixing desk', rect: [FOH.x - MEASURED.fohWidth / 2, FOH.z - 0.4, FOH.x + MEASURED.fohWidth / 2, FOH.z + 0.45], y0: Q, y1: Q + 1.7, draw: false },
   { label: 'dj desk', rect: DESK, y0: STAGE.y, y1: STAGE.y + 1.1, draw: false },
-  { label: 'speaker column', circle: [STAGE.x0 + 0.35, STAGE_MID - MEASURED.mainsApart / 2, 0.4], y0: STAGE.y, y1: STAGE.y + 3.4, draw: false },
-  { label: 'speaker column', circle: [STAGE.x0 + 0.35, STAGE_MID + MEASURED.mainsApart / 2, 0.4], y0: STAGE.y, y1: STAGE.y + 3.4, draw: false },
   { label: 'café bar', rect: [CAFE_BAR[1][0], CAFE_BAR[0][1] - 0.1, CAFE_BAR[0][0], CAFE.z1], y0: Q, y1: Q + 1.6, draw: false },
   { label: 'cashier', rect: [FOYER.x0, -3.2, FOYER.x0 + 1.1, -1], y0: Q, y1: Q + 1.2, draw: false },
   // nobody walks off the quay into the canal
@@ -256,13 +315,17 @@ const lights: LightSpec[] = [
   { id: 'hall-wash-0', set: 'hall', type: 'point', at: [14, Q + 3.9, STAGE_MID], colour: '#ff2a3a', intensity: 26, range: 22, decay: 1.6 },
   { id: 'hall-wash-1', set: 'hall', type: 'point', at: [27, Q + 3.9, STAGE_MID], colour: '#2a5cff', intensity: 30, range: 22, decay: 1.6 },
   { id: 'hall-stage', set: 'hall', type: 'spot', at: [STAGE.x0 - 3, Q + 4.3, STAGE_MID], target: [STAGE.x0 + 1.5, STAGE.y + 1, STAGE_MID], colour: '#cfd8ff', intensity: 60, range: 14, decay: 1.5, angle: 0.75, penumbra: 0.6, shadow: true },
-  { id: 'hall-bar', set: 'hall', type: 'point', at: [14, Q + 2.6, HALL.z0 + 1], colour: '#ffb070', intensity: 7, range: 9, decay: 1.8 },
+  { id: 'hall-bar', set: 'hall', type: 'point', at: [15, Q + 2.4, HALL.z0 + 1], colour: '#ffb070', intensity: 7, range: 9, decay: 1.8 },
+  // the working light, on by day when the room is empty; the venue switches it off at night
+  { id: 'hall-work', set: 'hall', type: 'point', at: [STAGE.x0 - 9, Q + 3.8, STAGE_MID - 1], colour: '#fff4e0', intensity: 55, range: 30, decay: 1.4 },
   { id: 'hall-strobe', set: 'hall', type: 'point', at: [24, Q + 4.2, STAGE_MID], colour: '#f2f5ff', intensity: 0, range: 40, decay: 1.2 },
   // the café: red, low and warm
   { id: 'cafe-0', set: 'cafe', type: 'point', at: [15, Q + 2.7, -5], colour: '#ff3a30', intensity: 14, range: 14, decay: 1.7 },
   { id: 'cafe-1', set: 'cafe', type: 'point', at: [27, Q + 2.7, -5], colour: '#ff5a3a', intensity: 14, range: 14, decay: 1.7 },
   { id: 'cafe-bar', set: 'cafe', type: 'point', at: [17.5, Q + 2.3, CAFE.z1 - 1], colour: '#ffc890', intensity: 6, range: 8, decay: 1.8 },
   { id: 'foyer', set: 'foyer', type: 'point', at: [4.6, Q + 2.6, -4], colour: '#ffd9b0', intensity: 9, range: 9, decay: 1.7 },
+  { id: 'wc-0', set: 'wc', type: 'point', at: [40, Q + 2.5, -2.2], colour: '#e8f0ff', intensity: 9, range: 9, decay: 1.7 },
+  { id: 'wc-1', set: 'wc', type: 'point', at: [47.5, Q + 2.5, -2.2], colour: '#ffd0e8', intensity: 9, range: 9, decay: 1.7 },
   // the quay: lamps along the frontage and in the garden, the glow of the door
   { id: 'quay-door', set: 'quay', type: 'point', at: [4.6, Q + 2.9, FOYER.z0 - 1.5], colour: '#ffe2c0', intensity: 22, range: 16, decay: 1.6, outdoor: true },
   { id: 'quay-garden', set: 'quay', type: 'point', at: [-22, Q + 4, -9], colour: '#ffc58a', intensity: 30, range: 26, decay: 1.5, outdoor: true },
@@ -292,26 +355,33 @@ const crowds: CrowdSpec[] = [
     dress: WARDROBE.mixed,
     staff: [bouncer(3.1, FOYER.z0 - 0.9, Q + 0.02, F.canal + 0.4), bouncer(6.1, FOYER.z0 - 0.9, Q + 0.02, F.canal - 0.4)],
   }),
-  talkers({ id: 'garden', room: 'quay', rect: GARDEN, y: Q + 0.02, count: [14, 34, 60], seed: 11, gap: 0.7, times: NIGHT, dress: WARDROBE.summer }),
+  group({ id: 'garden-seated', room: 'quay', people: TABLES.flatMap(([x, z]) => [-0.5, 0.5].flatMap((dx) => [person(x + dx, z - 0.75, Q + 0.46, F.inland, 'sit'), person(x + dx, z + 0.75, Q + 0.46, F.canal, 'sit')])), count: [8, 16, 24], times: NIGHT, dress: WARDROBE.summer }),
+  talkers({ id: 'garden', avoid: TABLES.map(([x, z]): Rect => [x - 1.1, z - 1.1, x + 1.1, z + 1.1]), clear: 0.2, room: 'quay', rect: GARDEN, y: Q + 0.02, count: [14, 34, 60], seed: 11, gap: 0.7, times: NIGHT, dress: WARDROBE.summer }),
   talkers({ id: 'quay-edge', room: 'quay', rect: [10, -13.4, 40, -12], y: Q + 0.02, count: [5, 12, 20], seed: 13, gap: 0.9, times: NIGHT, dress: WARDROBE.mixed }),
   // the door
-  doorStaff({ id: 'cashier', room: 'foyer', people: [person(FOYER.x0 + 0.5, -2.1, Q + 0.02, F.downstream, 'stand'), bouncer(6.6, -1.6, Q + 0.02, F.canal)], times: NIGHT }),
+  doorStaff({ id: 'cashier', room: 'foyer', people: [person(FOYER.x0 + 0.5, -2.1, Q + 0.02, F.downstream, 'stand'), bouncer(6.6, -1.6, Q + 0.02, F.canal), person(7.4, FOYER.z0 + 1, Q + 0.02, F.upstream, 'stand')], times: NIGHT }),
+  talkers({ id: 'wc', room: 'wc', rect: [WC.x0 + 0.5, WC.z0 + 1.9, WC.x1 - 1.2, WC.z1 - 0.4], y: Q + 0.02, count: [2, 4, 6], seed: 41, gap: 0.9, times: NIGHT, dress: WARDROBE.black }),
   // the café
   talkers({ id: 'cafe', room: 'cafe', rect: [10, CAFE.z0 + 2.9, 31, CAFE.z1 - 2.2], y: Q + 0.02, count: [14, 34, 56], seed: 21, gap: 0.62, faceTo: [34, -5], times: NIGHT, dress: WARDROBE.mixed }),
   group({ id: 'cafe-bar-staff', room: 'cafe', people: [person(12.5, CAFE.z1 - 0.8, Q + 0.02, F.canal, 'stand'), person(16.5, CAFE.z1 - 0.8, Q + 0.02, F.canal, 'stand')], times: NIGHT, dress: WARDROBE.staff }),
+  // on the sofas along the top step, and on the bar stools
+  group({ id: 'cafe-seated', room: 'cafe', people: [13.6, 14.9, 18.1, 19.4, 22.6, 23.9, 27.1, 28.4].map((x) => person(x, CAFE.z0 + 0.62, Q + 0.6 + 0.45, F.inland, 'sit')), count: [3, 6, 8], times: NIGHT, dress: WARDROBE.mixed }),
+  group({ id: 'cafe-stools', room: 'cafe', people: STOOLS.filter((_, i) => i % 2 === 0).map(([x, z]) => person(x, z, Q + 0.76, F.inland, 'sit')), count: [1, 3, 4], times: NIGHT, dress: WARDROBE.mixed }),
   dj({ id: 'cafe-dj', room: 'cafe', at: { x: CAFE_STAGE.x0 + 2.2, y: CAFE_STAGE.y, z: -5, facing: F.upstream }, times: NIGHT }),
   // the hall: the dance strip packed and facing the stage, the raised side standing and talking
   dancers({ id: 'floor', room: 'hall', rect: [HALL.x0 + 4, SPLIT + 0.3, STAGE.x0 - 0.7, HALL.z1 - 0.3], y: Q + 0.02, count: [70, 170, 280], seed: 31, gap: 0.55, avoid: [[STAGE.x0 - 7.4, STAGE_MID - 0.8, STAGE.x0 - 2.6, STAGE_MID + 0.8], [HALL.x0 + 4, STAGE_MID - 1.6, HALL.x0 + 9, STAGE_MID - 0.2]], clear: 0.15, faceTo: [STAGE.x0 + 1, STAGE_MID], armsUp: true, times: NIGHT, dress: WARDROBE.black }),
-  talkers({ id: 'side', room: 'hall', rect: [19.5, HALL.z0 + 0.4, STAGE.x0 - 1, SPLIT - 0.7], avoid: [[FOH.x - 1.2, FOH.z - 0.9, FOH.x + 1.2, FOH.z + 0.9]], clear: 0.2, y: Q + GUESS.platformRise + 0.02, count: [10, 24, 40], seed: 33, gap: 0.62, faceTo: [STAGE.x0, STAGE_MID], times: NIGHT, dress: WARDROBE.black }),
+  // the canal side of the floor, by the bar: looser, half of them dancing
+  dancers({ id: 'floor-left', room: 'hall', rect: [9.5, HALL.z0 + 2.7, PLATFORM_X - 1.6, SPLIT + 0.2], y: Q + 0.02, count: [24, 60, 100], seed: 35, gap: 0.62, faceTo: [STAGE.x0 + 1, STAGE_MID], avoid: [[19.3, HALL.z0, 22.7, HALL.z0 + 4.2]], clear: 0.15, times: NIGHT, dress: WARDROBE.black }),
+  talkers({ id: 'side', room: 'hall', rect: [PLATFORM_X + 1.2, HALL.z0 + 1.2, STAGE.x0 - 0.8, SPLIT - 1.3], y: Q + GUESS.platformRise + 0.02, count: [6, 14, 22], seed: 33, gap: 0.62, faceTo: [STAGE.x0, STAGE_MID], times: NIGHT, dress: WARDROBE.black }),
   group({
     id: 'hall-bar',
     room: 'hall',
-    people: [10.5, 11.6, 12.8, 14.1, 15.3, 16.6, 17.8].map((x, i) => person(x, HALL_BAR[0][1] + 0.55, Q + GUESS.platformRise + 0.02, F.canal + (i % 2 ? 0.3 : -0.2), 'talk')),
+    people: [11.6, 12.7, 13.9, 15.1, 16.3, 17.5, 18.6].map((x, i) => person(x, HALL_BAR[0][1] + 0.6, Q + 0.02, F.canal + (i % 2 ? 0.3 : -0.2), 'talk')),
     count: [3, 5, 7],
     times: NIGHT,
     dress: WARDROBE.black,
   }),
-  group({ id: 'hall-staff', room: 'hall', people: [person(12, HALL.z0 + 0.8, Q + GUESS.platformRise + 0.02, F.inland, 'stand'), person(16, HALL.z0 + 0.8, Q + GUESS.platformRise + 0.02, F.inland, 'stand'), person(FOH.x, FOH.z - 0.9, Q + GUESS.platformRise + 0.02, F.downstream, 'stand')], times: NIGHT, dress: WARDROBE.staff }),
+  group({ id: 'hall-staff', room: 'hall', people: [person(13, HALL.z0 + 0.8, Q + 0.14, F.inland, 'stand'), person(17, HALL.z0 + 0.8, Q + 0.14, F.inland, 'stand'), person(FOH.x, FOH.z - 0.85, Q + GUESS.platformRise + 0.02, F.downstream, 'stand')], times: NIGHT, dress: WARDROBE.staff }),
   dj({ id: 'dj', room: 'hall', at: DJ_AT, times: NIGHT }),
 ];
 
@@ -323,7 +393,7 @@ const viewpoints: Viewpoint[] = [
   { id: 'cafe', label: 'Café', title: 'Flex Café', text: TEXT.rooms.cafe, position: V(10.5, -4.2, Q + EYE), target: V(34, -5, Q + 1.6) },
   { id: 'hall', label: 'Hall', title: 'The hall, from the bar end', text: TEXT.rooms.hall, position: V(4.6, STAGE_MID - 1, Q + EYE), target: V(STAGE.x0, STAGE_MID, Q + 2.2) },
   { id: 'floor', label: 'Floor', title: 'On the dance floor', text: TEXT.views.floor, position: V(STAGE.x0 - 6, STAGE_MID, Q + EYE), target: V(STAGE.x0 + 1, STAGE_MID, Q + 2.6) },
-  { id: 'foh', label: 'Desk', title: 'At the mixing desk', text: TEXT.views.foh, position: V(FOH.x - 1.4, FOH.z - 0.3, Q + GUESS.platformRise + EYE), target: V(STAGE.x0 + 1, STAGE_MID, Q + 2.2) },
+  { id: 'foh', label: 'Desk', title: 'At the mixing desk', text: TEXT.views.foh, position: V(FOH.x - 0.9, FOH.z - 1.3, Q + GUESS.platformRise + EYE), target: V(STAGE.x0 + 1, STAGE_MID, Q + 2.2) },
   { id: 'booth', label: 'Booth', title: 'Behind the decks', text: TEXT.views.booth, position: V(STAGE.x1 - 0.2, STAGE_MID + 0.9, STAGE.y + EYE), target: V(20, STAGE_MID - 0.5, Q + 1.4) },
   { id: 'canal', label: 'Canal', title: 'From the far bank', text: TEXT.views.canal, position: V(34, -86, Q + EYE), target: V(14, 0, Q + 2) },
 ];
