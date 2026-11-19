@@ -1,8 +1,19 @@
 import { start } from './engine/app';
 import { catalogue, isVenue, venues } from './venues';
 
-/** Which venue: ?venue= in the address, else the one the build was made for, else none: the visitor chooses. */
+/** The venue named by the last part of the path: /berghain/, /projects/clubs/flex. */
+function fromPath() {
+  const last = location.pathname.split('/').filter(Boolean).pop();
+  return isVenue(last) ? last : null;
+}
+
+/**
+ * Which venue: the one the path ends in (<site>/berghain/), else ?venue= (the older form, still
+ * read), else the one the build was made for, else none: the visitor chooses.
+ */
 function chosen() {
+  const path = fromPath();
+  if (path) return path;
   const asked = new URLSearchParams(location.search).get('venue');
   if (isVenue(asked)) return asked;
   const built = import.meta.env.VITE_VENUE as string | undefined;
@@ -15,9 +26,8 @@ function choose() {
   if (!list) return;
   for (const v of catalogue) {
     const a = document.createElement('a');
-    const url = new URL(location.href);
-    url.searchParams.set('venue', v.id);
-    a.href = url.pathname + url.search;
+    // a folder of its own under wherever the chooser is served from
+    a.href = `${location.pathname.replace(/[^/]*$/, '')}${v.id}/`;
     for (const [cls, text] of [
       ['cw-choose-city', v.city],
       ['cw-choose-name', v.name],
@@ -37,6 +47,9 @@ function choose() {
 }
 
 const venue = chosen();
+// the way back to the chooser: one folder up from a venue's own address
+const home = document.getElementById('cw-home') as HTMLAnchorElement | null;
+if (home) home.href = fromPath() ? '../' : location.pathname;
 if (venue) {
   venues[venue]()
     .then(start)

@@ -79,6 +79,22 @@ body {
   flex: 1;
   min-width: 0;
 }
+.cw-home {
+  display: inline-block;
+  margin-bottom: 0.15rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cw-muted);
+  text-decoration: none;
+}
+.cw-home:hover,
+.cw-home:focus-visible {
+  color: var(--cw-ink);
+}
+.cw-home::before {
+  content: '\2190\00a0';
+}
 .cw-title h1 {
   margin: 0;
   font-size: 0.95rem;

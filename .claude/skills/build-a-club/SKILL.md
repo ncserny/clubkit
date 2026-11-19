@@ -64,7 +64,7 @@ If you build something another club could use, put it in `src/kit/`, export it f
 Run the dev server (`npm run dev`) and:
 
 1. **Typecheck and build:** `npm run typecheck && npm run build`.
-2. **Look at every viewpoint**, at night and by day (`?venue=<id>&view=<viewpoint>&time=day&ui=0`). Wait until the page says it is ready before judging a screenshot. Compare each against the photograph it came from.
+2. **Look at every viewpoint**, at night and by day (`/<id>/?view=<viewpoint>&time=day&ui=0`). Wait until the page says it is ready before judging a screenshot. Compare each against the photograph it came from.
 3. **Walk it.** Write `tools/test/routes/<id>.json` (see `flex.json`) with the routes a visitor takes and the things that must stop them, then:
    `VENUE=<id> ROUTE=tools/test/routes/<id>.json BASE=http://localhost:5173/ node tools/test/cdp.mjs tools/test/route.mjs`
 4. **If you changed the engine or the kit**, prove the other venues did not change: render before and after with `tools/test/render.mjs` and compare with `tools/test/compare.mjs`.

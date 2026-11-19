@@ -11,9 +11,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:mos": "vite --open /?venue=mos",
-    "dev:berghain": "vite --open /?venue=berghain",
-    "dev:flex": "vite --open /?venue=flex",
+    "dev:mos": "vite --open /mos/",
+    "dev:berghain": "vite --open /berghain/",
+    "dev:flex": "vite --open /flex/",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"

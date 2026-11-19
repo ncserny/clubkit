@@ -25,9 +25,9 @@ npm install
 npm run dev
 ```
 
-Then open the address Vite prints (normally http://localhost:5173). `npm run dev:mos`, `npm run dev:berghain` and `npm run dev:flex` open a venue directly. `?venue=<id>` picks a venue; without it the page lists the venues to choose from (`catalogue` in `src/venues/index.ts`), unless the build was made for one with the `VITE_VENUE` environment variable.
+Then open the address Vite prints (normally http://localhost:5173). `npm run dev:mos`, `npm run dev:berghain` and `npm run dev:flex` open a venue directly. Every venue has an address of its own: `/berghain/`, `/mos/`, `/flex/`. The bare address lists the venues to choose from (`catalogue` in `src/venues/index.ts`), unless the build was made for one venue with the `VITE_VENUE` environment variable. The older form `?venue=<id>` still works.
 
-`npm run build` writes a static site to `dist/` (relative paths, so it can be served from any folder). `npm run typecheck` runs TypeScript.
+`npm run build` writes a static site to `dist/`: the chooser at its root and a folder per venue. It uses relative paths, so it can be served from any folder; put it at `/projects/clubs/` and Flex is at `/projects/clubs/flex/`. `npm run typecheck` runs TypeScript.
 
 ## Controls
 
@@ -52,7 +52,7 @@ Keys held with Ctrl, Cmd or Alt are left to the browser.
 
 | Parameter | Values | Effect |
 |---|---|---|
-| `venue` | a venue id | Which venue to show |
+| `venue` | a venue id | Which venue to show, for an address that does not name one in its path |
 | `view` | a viewpoint id from the venue's plan | Open on that viewpoint |
 | `time` | a time id from the venue's plan: `day` for Ministry of Sound, `morning` for Berghain | Open at that time of day |
 | `detail` | `lite`, `balanced`, `ultra` | Force a quality level |
@@ -208,7 +208,7 @@ If an AI agent is doing the work, point it at `.claude/skills/build-a-club/SKILL
 2. Get the map data: `node tools/fetch-osm.mjs <lat> <lon> <radius in metres> src/venues/<id>/osm.json`. It asks the Overpass API, trying several mirrors with a growing wait between attempts, and converts the answer to metres around the given point.
 3. Start `build.ts` with `buildBlockout(ctx)` from `engine/blockout.ts`. That draws the plan as plain blocks, which is enough to walk it and check it against the sources. Then fit it out from the kit (see `venues/flex/build.ts`) and dress it afterwards.
 4. Add it to `src/venues/index.ts`.
-5. Open `/?venue=<id>`.
+5. Open `/<id>/`.
 
 ## Ministry of Sound: coordinates and what is guessed
 

@@ -43,7 +43,7 @@ export const copy: Copy = {
       '<li>The hall follows the club’s own technical drawings: the stage 1.02 metres high, the two speaker columns 4.88 metres apart, the mixing desk 7.86 metres from the stage, the LED wall of 5 by 3 metres, the grid of 19 by 8 spots over the floor.</li>' +
       '<li>What no source gives is guessed, and the plan says which: the length and height of the hall, where the door, the cashier and the bars are, and how the café and the hall lie against each other.</li>' +
       '</ul>',
-    '<p>Nine viewpoints: the bridge, the steps, the door, the café, the hall, the dance floor, the mixing desk, the booth and the far bank. A link can open on any of them, for example <a href="?venue=flex&amp;view=floor">the dance floor</a>.</p>',
+    '<p>Nine viewpoints: the bridge, the steps, the door, the café, the hall, the dance floor, the mixing desk, the booth and the far bank. A link can open on any of them, for example <a href="?view=floor">the dance floor</a>.</p>',
   ],
   infoTitle: 'Flex in 3D',
   infoMeta: '2026. Code, map data, synthesised sound. Runs in a browser.',
