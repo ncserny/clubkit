@@ -324,6 +324,6 @@ You can use, adapt, and share the material for noncommercial purposes. When shar
 
 Suggested credit: [Built with Club Kit by Nader Cserny](https://github.com/ncserny/clubkit).
 
-For promotional or other commercial use, contact [Nader Cserny](https://github.com/ncserny) for permission.
+For promotional or other commercial use, contact [Nader Cserny](https://nader.io) for permission.
 
 **Not covered by the license:** `src/venues/mos/crest.webp` is Ministry of Sound's own artwork and `src/venues/flex/logo.svg` is Flex's own logo; both are used only to identify the buildings. The names of the clubs and artists are theirs. Map data in each venue's `osm.json` is © OpenStreetMap contributors under the Open Database License.
