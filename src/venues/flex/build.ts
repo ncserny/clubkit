@@ -5,8 +5,9 @@ import { checkerPlate, rawConcrete, tiled } from '../../engine/materials';
 import type { BuildContext, Pt, VenueHooks, Vec3 } from '../../engine/types';
 import { canvasTexture } from '../../engine/util';
 import * as K from '../../kit';
-import { BRIDGE, CAFE, CAFE_BAR, CAFE_STAGE, CLOAK, COLUMN, COLUMNS, CUBICLES, DESK, FOH, FOYER, GARDEN, GUESS, HALL, HALL_BAR, LEFT_EDGE, LEFT_WALL, MEASURED, MERCH, PILLAR, PILLARS, PLATFORM_X, Q, RAILS, RIGHT_EDGE, RIGHT_WALL, SHED, SPLIT, STAGE, STAGE_MID, STEP_BAY, STEPS, STOOLS, TABLES, WATER, WC } from './plan';
-import { makeFinishes, notice, ticker, type Finishes } from './textures';
+import logoUrl from './logo.svg';
+import { BRIDGE, CAFE, CAFE_BAR, CAFE_COLUMNS, CAFE_DUCT, CAFE_RAISED, CAFE_STAGE, CLOAK, COLUMN, COLUMNS, CUBICLES, DESK, FOH, FOYER, GARDEN, GUESS, HALL, HALL_BAR, LEFT_EDGE, LEFT_WALL, MEASURED, MERCH, PILLAR, PILLARS, PLATFORM_X, Q, RAILS, RIGHT_EDGE, RIGHT_WALL, SHED, SOFAS, SPLIT, STAGE, STAGE_MID, STEP_BAY, STEPS, STOOLS, TABLES, WATER, WC } from './plan';
+import { bulbSign, cocktails, makeFinishes, mural, notice, ticker, type Finishes } from './textures';
 
 /**
  * Flex, built almost entirely from the kit: the plan is drawn as blocks (engine/blockout.ts),
@@ -28,7 +29,8 @@ function finishes(fin: Finishes, mats: K.Mats) {
         // the venue draws both quays itself, edge to edge
         if (s.room === 'quay' || s.room === 'far-quay') return false;
         if (s.room === 'wc') return fin.surface('tiles', '#6d7172', { rough: 0.45, relief: 0.5 });
-        return fin.surface('screed', s.room === 'cafe' ? '#8a847c' : '#8f8a82', { rough: 0.75, relief: 0.5 });
+        // the café's floor is dark and worn smooth; the hall's is pale
+        return s.room === 'cafe' ? fin.surface('screed', '#4b4947', { rough: 0.45, relief: 0.3 }) : fin.surface('screed', '#8f8a82', { rough: 0.75, relief: 0.5 });
       case 'walls':
         if (s.room === 'wc') {
           // the long wall on the hall's side is the wall of sweets
@@ -38,8 +40,8 @@ function finishes(fin: Finishes, mats: K.Mats) {
         return s.room && walls[s.room] ? fin.surface(walls[s.room], '#ffffff', { relief: 0.7, wall: true }) : undefined;
       case 'platform':
         // the hall's stage is open underneath, where the bass horns are: the venue draws it
-        if (s.id === 'stage') return false;
-        if (s.id === 'cafe-stage') return mats.plain('#0e0e10', { rough: 0.6 });
+        if (s.id === 'stage' || s.id === 'cafe-stage') return false;
+        if (s.id === 'cafe-bar') return fin.surface('screed', '#a39e95', { rough: 0.7, relief: 0.5 });
         return fin.surface('screed', s.id === 'hall-side' ? '#7a756e' : '#99948b', { rough: 0.75, relief: 0.5 });
       case 'stair':
         return fin.surface('slabs', '#9a958c', { relief: 0.6 });
@@ -55,20 +57,6 @@ function finishes(fin: Finishes, mats: K.Mats) {
 }
 
 const UP = -Math.PI / 2; // facing upstream, toward the bar end of the hall: where both stages look
-
-/** The wordmark: bold, heavily slanted, condensed capitals, widely spaced. Drawn, not copied from a file. */
-function sign() {
-  return canvasTexture(1024, 224, (c, w, h) => {
-    c.fillStyle = '#0b0b0c';
-    c.fillRect(0, 0, w, h);
-    c.fillStyle = '#f4f4f0';
-    c.textAlign = 'center';
-    c.textBaseline = 'middle';
-    c.font = "italic 900 190px 'Arial Narrow', 'Helvetica Neue', Impact, sans-serif";
-    c.transform(1, 0, -0.18, 1, 0, 0);
-    'FLEX'.split('').forEach((letter, i) => c.fillText(letter, w / 2 + (i - 1.5) * 215 + 22, h / 2 + 8));
-  });
-}
 
 export function build(ctx: BuildContext): VenueHooks {
   const mats = K.makeMats(ctx.quality);
@@ -93,9 +81,9 @@ export function build(ctx: BuildContext): VenueHooks {
   const sprayed = [3, 7, 19].map((seed) => {
     const map = K.graffitiWall(seed, '#77726a');
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.repeat.set(1 / 5, 1 / 5);
-    // the foot of the picture stands on the quay
-    map.offset.y = -Q / 5;
+    // one tile is the wall from the quay to the street
+    map.repeat.set(1 / 6.5, 1 / -Q);
+    map.offset.y = 1;
     return new THREE.MeshStandardMaterial({ map, roughness: 0.95, side: THREE.DoubleSide });
   });
 
@@ -110,11 +98,17 @@ export function build(ctx: BuildContext): VenueHooks {
     for (let i = 0; i < wall.length - 1; i++) {
       const [a, b] = [wall[i], wall[i + 1]];
       const near = Math.abs(a[0]) <= 145 && Math.abs(b[0]) <= 145;
-      if (near) o.add(sprayed[(i + side) % sprayed.length], K.panel(a, b, Q, Q + 5, true));
-      o.add(stone, K.panel(a, b, near ? Q + 5 : Q - 0.02, 0, true));
+      o.add(near ? sprayed[(i + side) % sprayed.length] : stone, K.panel(a, b, Q - 0.02, 0, true));
       o.add(stone, K.along(a, b, 0.45, 0, 1.05));
     }
   });
+  // the painted boards along the garden, standing against the quay wall
+  const boards = mural(6);
+  boards.wrapS = boards.wrapT = THREE.RepeatWrapping;
+  boards.repeat.set(1 / 16, 1 / 5);
+  boards.offset.y = -Q / 5;
+  const wallAt = (x: number): Pt => [x, (-5.4 * -x) / 42 - 0.12];
+  o.add(new THREE.MeshStandardMaterial({ map: boards, roughness: 0.8, side: THREE.DoubleSide }), K.panel(wallAt(-40), wallAt(-8), Q, Q + 5, true));
   // the wall along the canal side of the steps
   o.add(stone, K.along([STEPS.top, STEPS.z0 - 0.25], [STEPS.bottom + 0.3, STEPS.z0 - 0.25], 0.3, Q, 1.05));
 
@@ -138,8 +132,11 @@ export function build(ctx: BuildContext): VenueHooks {
     return a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0]);
   };
   for (const x of [-80, -52, -26, 0, 26, 52, 78]) K.lampPost(o, mats, [x, onEdge(x) + 2.2], Q);
-  if (ctx.quality.props) for (let x = -92; x <= 92; x += 6) K.bollard(o, mats, [x, onEdge(x) + 0.5], Q);
-  ([[-37, -6.4], [-25, -4.9], [-11, -3.2], [56, -1.9], [66, -1.3], [76, -0.6], [88, 0.4]] as Pt[]).forEach((p, i) => K.tree(o, mats, p, Q, 7.5 + (i % 3), i + 1));
+  // a railing along the water's edge
+  const railPts: Pt[] = [];
+  for (let x = -94; x <= 94; x += 4) railPts.push([x, onEdge(x) + 0.3]);
+  K.railing(o, mats.plain('#2c2e31', { rough: 0.5, metal: 0.6 }), railPts, Q, 1.05, ctx.quality.props ? 0.5 : 2);
+  ([[-37, -6.4], [-5, -2.4], [56, -1.9], [66, -1.3], [76, -0.6], [88, 0.4]] as Pt[]).forEach((p, i) => K.tree(o, mats, p, Q, 7.5 + (i % 3), i + 1));
   // the loading doors in the quay wall, past the end of the frontage
   const door = mats.plain('#2a2d30', { rough: 0.5, metal: 0.6 });
   for (const x of [54.4, 57.4]) {
@@ -169,9 +166,14 @@ export function build(ctx: BuildContext): VenueHooks {
   ];
   for (const [a, b, from] of walls) o.add(front, K.panel(a, b, from ?? Q, H, true));
   o.add(roof, groundPolygon([[FOYER.x0 - e, 0], [FOYER.x0 - e, fz], [FOYER.x1 + e, fz], [FOYER.x1 + e, cz], [CAFE.x1 + e, cz], [CAFE.x1 + e, sz], [SHED.x1 + e, sz], [SHED.x1 + e, 0]], H));
-  // the sign over the door, read from the quay
-  const signMesh = new THREE.Mesh(K.panel([7.4, fz - 0.03], [1.8, fz - 0.03], Q + GUESS.doorHeight + 0.12, H - 0.1), new THREE.MeshBasicMaterial({ map: sign(), side: THREE.DoubleSide }));
-  outside.add(signMesh);
+  // the sign over the door: the club's logo in bulbs, on a frame that stands on the roof; and the red ticker beside the door
+  const signW = 5.2;
+  const signH = (signW * 156) / 992;
+  const mid = (d0 + d1) / 2 + 0.6;
+  const signMat = new THREE.MeshBasicMaterial({ map: bulbSign(logoUrl), transparent: true, alphaTest: 0.15, side: THREE.DoubleSide, toneMapped: false });
+  outside.add(new THREE.Mesh(K.panel([mid + signW / 2, fz - 0.05], [mid - signW / 2, fz - 0.05], H + 0.25, H + 0.25 + signH), signMat));
+  for (const x of [mid - signW / 2 + 0.3, mid + signW / 2 - 0.3]) o.add(black, K.cyl(x, fz + 0.02, 0.02, H, H + 0.25 + signH, 6));
+  outside.add(new THREE.Mesh(K.panel([FOYER.x1 + e - 0.2, fz - 0.03], [d1 + 0.3, fz - 0.03], Q + 2.42, Q + 2.42 + (FOYER.x1 + e - 0.5 - d1) * (96 / 512)), new THREE.MeshBasicMaterial({ map: ticker('EINTRITT'), side: THREE.DoubleSide })));
   // the café's long window, red from inside at night
   const glass = mats.glow('#000000', true);
   outside.add(new THREE.Mesh(K.panel([CAFE.x1 - 2, cz - 0.03], [CAFE.x0 + 2.5, cz - 0.03], Q + 1.05, Q + 2.45), glass));
@@ -361,9 +363,9 @@ export function build(ctx: BuildContext): VenueHooks {
   h.add(iron, K.box(HALL.x0 + 1, HALL.z1 - 0.14, sx - 1.4, HALL.z1 - 0.1, Q + 2.02, Q + 2.06));
   h.add(tagged, K.box(23.6, HALL.z1 - 0.22, 24.3, HALL.z1, Q, top));
   const plate = new THREE.MeshStandardMaterial({ map: tiled(checkerPlate(), 2, 2), color: '#5d6063', roughness: 0.45, metalness: 0.75 });
-  h.add(plate, K.box(HALL.x0 + 0.5, HALL.z1 - 1.7, HALL.x0 + 4.4, HALL.z1 - 0.9, Q, Q + 0.07));
-  h.add(deck, K.box(HALL.x0 + 0.5, HALL.z1 - 0.85, HALL.x0 + 4.4, HALL.z1 - 0.05, Q, Q + 0.1));
-  h.add(mats.plain('#8f1a1c', { rough: 0.6 }), K.box(HALL.x0 + 0.5, HALL.z1 - 0.9, HALL.x0 + 4.4, HALL.z1 - 0.85, Q, Q + 0.11));
+  h.add(plate, K.box(19, HALL.z1 - 1.7, 22.9, HALL.z1 - 0.9, Q, Q + 0.07));
+  h.add(deck, K.box(19, HALL.z1 - 0.85, 22.9, HALL.z1 - 0.05, Q, Q + 0.1));
+  h.add(mats.plain('#8f1a1c', { rough: 0.6 }), K.box(19, HALL.z1 - 0.9, 22.9, HALL.z1 - 0.85, Q, Q + 0.11));
 
   /* ---- the raised side: curved steps round its corner, the mixing desk, steps between red rails ---- */
   const red = mats.plain('#b3161c', { rough: 0.45, metal: 0.3 });
@@ -409,6 +411,11 @@ export function build(ctx: BuildContext): VenueHooks {
   /* ---- the bar, of steel, on its plinth against the quay wall ---- */
   h.add(concrete, K.box(HALL_BAR[0][0] - 0.25, HALL.z0, HALL_BAR[1][0] + 0.25, HALL_BAR[0][1] + 0.25, Q, Q + 0.12));
   K.barCounter(hall, HALL_BAR[0], HALL_BAR[1], Q + 0.12, { colour: '#34373a', top: '#8a8d90', height: 1.0, backBar: 0.75, seed: 9 });
+  // crates lit blue under the shelves, and the sign over it all
+  h.add(mats.glow('#3aa0ff'), K.box(HALL_BAR[0][0] + 0.3, HALL.z0 + 0.04, HALL_BAR[1][0] - 0.3, HALL.z0 + 0.1, Q + 1.06, Q + 1.1));
+  const neon = new THREE.MeshBasicMaterial({ map: cocktails(), transparent: true, alphaTest: 0.2, side: THREE.DoubleSide, toneMapped: false });
+  const barMid = (HALL_BAR[0][0] + HALL_BAR[1][0]) / 2;
+  hallGroup.add(new THREE.Mesh(K.panel([barMid - 3.4, HALL.z0 + 0.5], [barMid + 3.4, HALL.z0 + 0.5], Q + 2.5, Q + 2.5 + (6.8 * 160) / 1024), neon));
 
   // the matrix: 19 by 8 spots in the ceiling over the dance iron, chasing with the beat
   const [cols, rows] = MEASURED.matrix;
@@ -421,27 +428,92 @@ export function build(ctx: BuildContext): VenueHooks {
   hall.dust(7, 420, [HALL.x0 + 4, sx], [Q + 0.4, top - 0.4], [HALL.z0 + 2, HALL.z1], 0.55);
 
   /* ================================================================ café ==== */
+  // From the club's photographs of it empty: a red ceiling with strips of tube light, the bar
+  // on a raised side reached by three winding concrete steps edged in red light, leather sofas
+  // on castors, a silver duct down the inner wall, and at the end a deck on scissor legs.
   const cafe = stages.stage(room('cafe'));
   const c = cafe.batch;
-  K.barCounter(cafe, CAFE_BAR[0], CAFE_BAR[1], Q, { backBar: 0.7, top: '#5a1216', seed: 2 });
-  const leather = [mats.plain('#7a1418', { rough: 0.5 }), mats.plain('#141416', { rough: 0.5 })];
-  [13, 17.5, 22, 26.5].forEach((x, i) => K.sofa(c, leather[i % 2], x, CAFE.z0 + 0.08, x + 2.4, CAFE.z0 + 1.0, Q + 0.6, '-z'));
-  for (const p of STOOLS) K.stool(c, mats, p, Q);
-  // a silver duct under the red ceiling
-  c.add(mats.plain('#9da1a4', { rough: 0.35, metal: 0.9 }), new THREE.CylinderGeometry(0.18, 0.18, CAFE.x1 - CAFE.x0 - 6, 12).rotateZ(Math.PI / 2).translate((CAFE.x0 + CAFE.x1) / 2 - 2, Q + GUESS.cafeHeight - 0.3, CAFE.z1 - 0.5));
-  // red lines along the edges of the steps
-  const redLine = mats.glow('#ff1a1a');
-  for (const [z, y] of [[CAFE.z0 + 2.6, Q + 0.3], [CAFE.z0 + 1.3, Q + 0.6]]) c.add(redLine, K.box(12, z - 0.02, 30, z + 0.02, y - 0.03, y + 0.005));
-  // light strips along the red ceiling
-  const stripLight = mats.glow('#ffd6c8');
-  for (const z of [-7.2, -4.8, -2.4]) c.add(stripLight, K.box(11, z - 0.04, 30, z + 0.04, Q + GUESS.cafeHeight - 0.06, Q + GUESS.cafeHeight - 0.03));
-  // the small stage: two players and a mixer, three boxes a side, the LED wall
-  K.djBooth(cafe, { at: [CAFE_STAGE.x0 + 1.4, -5], y: CAFE_STAGE.y, facing: UP, layout: 'cdjs' });
-  for (const z of [CAFE_STAGE.z0 + 0.35, CAFE_STAGE.z1 - 0.35]) K.speakerStack(cafe, [CAFE_STAGE.x0 + 0.3, z], CAFE_STAGE.y, UP, { columns: 1, rows: 3, size: [0.5, 0.5, 0.5] });
+  const cafeGroup = room('cafe');
+  const cTop = Q + GUESS.cafeHeight;
+  const raised = CAFE_RAISED.y;
+
+  // the winding steps: each a slab whose edge swings out and back along the room
+  const redLine = mats.glow('#ff2a22');
+  const pale = fin.surface('screed', '#a39e95', { rough: 0.7, relief: 0.5 });
+  const wave = (x: number, k: number) => CAFE_RAISED.z1 + 0.42 * k + 0.5 * Math.sin((x - CAFE_RAISED.x0) * 0.62 + k * 0.5) * Math.min(1, (x - CAFE_RAISED.x0) / 1.5, (CAFE_RAISED.x1 - x) / 1.5);
+  for (let k = 2; k >= 0; k--) {
+    const edge: Pt[] = [];
+    for (let x = CAFE_RAISED.x0; x <= CAFE_RAISED.x1 + 1e-6; x += 0.4) edge.push([x, wave(x, k)]);
+    const y1 = raised - (GUESS.platformRise / 3) * k;
+    c.add(pale, K.prism([[CAFE_RAISED.x0, CAFE_RAISED.z1 - 0.3], ...edge, [CAFE_RAISED.x1, CAFE_RAISED.z1 - 0.3]], Q, y1));
+    for (let i = 0; i < edge.length - 1; i++) c.add(redLine, K.along(edge[i], edge[i + 1], 0.035, y1 - 0.012, y1 + 0.006));
+  }
+
+  // the bar on the raised side, pale and long, with red stools and blue crates behind
+  K.barCounter(cafe, CAFE_BAR[0], CAFE_BAR[1], raised, { colour: '#b4b0a8', top: '#8a8d90', backBar: 0.7, seed: 2 });
+  for (const p of STOOLS) K.stool(c, mats, p, raised, '#c0201c');
+  const crate = mats.plain('#5fb4e6', { rough: 0.6 });
+  for (let x = CAFE_BAR[0][0] + 0.4; x < CAFE_BAR[1][0] - 0.6; x += 1.3) c.add(crate, K.box(x, CAFE.z0 + 0.12, x + 0.55, CAFE.z0 + 0.5, raised + 0.02, raised + 0.36 + 0.34 * (Math.round(x * 3) % 2)));
+  c.add(mats.glow('#dff0ff'), K.box(CAFE_BAR[0][0], CAFE.z0 + 0.3, CAFE_BAR[1][0], CAFE.z0 + 0.38, cTop - 0.5, cTop - 0.46));
+  // a grab rail on each column
+  const tubeGrey = mats.plain('#8a8d90', { rough: 0.4, metal: 0.8 });
+  for (const [x, z] of CAFE_COLUMNS) c.add(tubeGrey, K.tube(new THREE.Vector3(x - 0.9, raised + 0.75, z + 0.32), new THREE.Vector3(x + 0.9, raised + 1.0, z + 0.32), 0.022, 8));
+
+  // sofas on castors, red and black
+  const leather = { red: mats.plain('#a81c18', { rough: 0.42 }), black: mats.plain('#141416', { rough: 0.42 }) };
+  for (const { rect: [x0, z0, x1, z1], back, red } of SOFAS) {
+    K.sofa(c, red ? leather.red : leather.black, x0, z0, x1, z1, Q + 0.08, back);
+    for (const [x, z] of [[x0 + 0.08, z0 + 0.08], [x1 - 0.08, z0 + 0.08], [x0 + 0.08, z1 - 0.08], [x1 - 0.08, z1 - 0.08]]) c.add(tubeGrey, K.cyl(x, z, 0.035, Q, Q + 0.08, 6));
+  }
+
+  // overhead: tube lights in strips, black conduit, and the duct along the inner wall with its branch to the floor
+  const tubes = mats.glow('#fff1e2', true);
+  for (const z of [-5.6, -4.4, -3.2]) for (let x = 11; x < CAFE_STAGE.x0 - 2; x += 2.9) c.add(tubes, K.box(x, z - 0.05, x + 2.5, z + 0.05, cTop - 0.07, cTop - 0.03));
+  const conduit = mats.plain('#0d0d0e', { rough: 0.6 });
+  for (const z of [-7.6, -6.4, -2.2, -1.2]) c.add(conduit, K.box(CAFE.x0 + 0.3, z - 0.02, CAFE.x1 - 0.3, z + 0.02, cTop - 0.09, cTop - 0.05));
+  for (let x = 11.5; x < CAFE.x1; x += 3.4) c.add(conduit, K.box(x - 0.02, CAFE.z0 + 0.2, x + 0.02, CAFE.z1 - 0.2, cTop - 0.13, cTop - 0.09));
+  const silverC = mats.plain('#a4a8ab', { rough: 0.35, metal: 0.9 });
+  const along = (x0: number, x1: number, z: number, y: number, r: number) => new THREE.CylinderGeometry(r, r, x1 - x0, 14).rotateZ(Math.PI / 2).translate((x0 + x1) / 2, y, z);
+  c.add(silverC, along(CAFE.x0 + 1.5, CAFE.x1 - 5, CAFE_DUCT[1], cTop - 0.42, 0.27));
+  c.add(silverC, K.cyl(CAFE_DUCT[0], CAFE_DUCT[1], 0.27, Q, cTop - 0.42, 14));
+  if (ctx.quality.props) {
+    for (let x = CAFE.x0 + 2; x < CAFE.x1 - 5; x += 0.9) c.add(silverC, along(x - 0.02, x + 0.02, CAFE_DUCT[1], cTop - 0.42, 0.284));
+    for (let y = Q + 0.4; y < cTop - 0.8; y += 0.6) c.add(silverC, K.cyl(CAFE_DUCT[0], CAFE_DUCT[1], 0.284, y, y + 0.04, 14));
+  }
+
+  /* ---- the café's stage: a deck of plywood on scissor legs ---- */
+  const cs = CAFE_STAGE;
+  const csMid = (cs.z0 + cs.z1) / 2;
+  const ply = mats.plain('#5a4636', { rough: 0.8 });
+  const alu = mats.plain('#b0b3b6', { rough: 0.4, metal: 0.8 });
+  c.add(ply, K.box(cs.x0, cs.z0, cs.x1, cs.z1, cs.y - 0.05, cs.y));
+  c.add(alu, K.box(cs.x0 - 0.015, cs.z0, cs.x0, cs.z1, cs.y - 0.07, cs.y + 0.004));
+  for (let z = cs.z0 + 0.15; z < cs.z1 - 1; z += (cs.z1 - cs.z0 - 0.3) / 3) {
+    const zb = z + (cs.z1 - cs.z0 - 0.3) / 3;
+    for (const x of [cs.x0 + 0.15, cs.x1 - 0.3]) {
+      c.add(alu, K.tube(new THREE.Vector3(x, Q + 0.02, z), new THREE.Vector3(x, cs.y - 0.06, zb), 0.02, 6));
+      c.add(alu, K.tube(new THREE.Vector3(x, cs.y - 0.06, z), new THREE.Vector3(x, Q + 0.02, zb), 0.02, 6));
+    }
+  }
+  K.djBooth(cafe, { at: [cs.x0 + 1.4, csMid], y: cs.y, facing: UP, layout: 'cdjs' });
+  // a cabinet on the floor each side of the deck
+  for (const z of [cs.z0 - 0.75, cs.z1 + 0.1]) K.speakerCabinet(c, mats, cs.x0 + 0.2, z, cs.x0 + 0.85, z + 0.65, Q, Q + 1.2, 'ew');
   const cafeLed = K.ledScreen(mats, '#ff3a30', 1.4);
-  room('cafe').add(new THREE.Mesh(K.panel([CAFE.x1 - 0.06, -5 + MEASURED.cafeLed[0] / 2], [CAFE.x1 - 0.06, -5 - MEASURED.cafeLed[0] / 2], CAFE_STAGE.y + 0.15, Q + GUESS.cafeHeight - 0.1, true), cafeLed));
+  const cafeLedTop = Math.min(cTop - 0.25, cs.y + 0.1 + MEASURED.cafeLed[1]);
+  cafeGroup.add(new THREE.Mesh(K.panel([CAFE.x1 - 0.06, csMid + MEASURED.cafeLed[0] / 2], [CAFE.x1 - 0.06, csMid - MEASURED.cafeLed[0] / 2], cs.y + 0.1, cafeLedTop, true), cafeLed));
   K.playScreens(cafe, [cafeLed], 0.0, 0.05, 0.4);
-  for (const x of [14, 20, 26]) for (const z of [CAFE.z0 + 0.5, CAFE.z1 - 0.5]) K.parCan(cafe, c, { at: [x, Q + GUESS.cafeHeight - 0.02, z], colour: '#ff2a2a' });
+  // old par cans hung in a row before the deck, and two bars of LEDs over it
+  for (let k = 0; k < 5; k++) K.parCan(cafe, c, { at: [cs.x0 - 1.2, cTop - 0.12, cs.z0 + ((cs.z1 - cs.z0) * (k + 0.5)) / 5], colour: k % 2 ? '#ff2a2a' : '#ff8a2a' });
+  const bars = mats.glow('#ff6a3a', true);
+  for (const x of [cs.x0 + 0.6, cs.x0 + 1.6]) {
+    c.add(conduit, K.box(x - 0.05, cs.z0 + 0.3, x + 0.05, cs.z1 - 0.3, cTop - 0.4, cTop - 0.3));
+    for (let z = cs.z0 + 0.4; z < cs.z1 - 0.35; z += 0.16) c.add(bars, K.box(x - 0.03, z, x + 0.03, z + 0.07, cTop - 0.41, cTop - 0.4));
+  }
+  // the glass doors beside the deck, on the canal side, and the red sign over them
+  const glassDoor = new THREE.MeshStandardMaterial({ color: '#27343a', roughness: 0.1, metalness: 0.6 });
+  c.add(glassDoor, K.panel([CAFE.x1 - 0.05, cs.z0 - 0.3], [CAFE.x1 - 0.05, CAFE.z0 + 0.35], Q + 0.05, Q + 2.2));
+  for (const z of [cs.z0 - 0.3, (cs.z0 - 0.3 + CAFE.z0 + 0.35) / 2, CAFE.z0 + 0.35]) c.add(alu, K.box(CAFE.x1 - 0.09, z - 0.025, CAFE.x1 - 0.04, z + 0.025, Q, Q + 2.25));
+  cafeGroup.add(new THREE.Mesh(K.panel([CAFE.x1 - 0.1, CAFE.z0 + 0.5], [CAFE.x1 - 0.1, cs.z0 - 0.45], Q + 2.32, Q + 2.5), new THREE.MeshBasicMaterial({ map: ticker('EXIT'), side: THREE.DoubleSide })));
 
   /* =============================================================== foyer ==== */
   const foyer = stages.stage(room('foyer'));
@@ -496,13 +568,15 @@ export function build(ctx: BuildContext): VenueHooks {
           const wave = 0.5 + 0.5 * Math.sin(col * 0.7 - beat * Math.PI * 0.5);
           for (let r = 0; r < rows; r++) {
             if (strobe) tint.setRGB(1, 1, 1);
-            else tint.setHSL((0.98 + 0.12 * Math.sin(beat * 0.11 + r * 0.4) + 1) % 1, 0.9, 0.05 + 0.5 * wave * (0.5 + 0.5 * pulse));
+            // amber, as the club runs it, swinging to red and back
+            else tint.setHSL(0.075 + 0.045 * Math.sin(beat * 0.11 + r * 0.4), 1, 0.04 + 0.5 * wave * (0.5 + 0.5 * pulse));
             spots.setColorAt(col * rows + r, tint);
           }
         }
         spots.instanceColor!.needsUpdate = true;
-        dots.color.setScalar(strobe ? 1 : 0.15 + 0.85 * pulse);
+        dots.color.setRGB(1, 0.62, 0.18).multiplyScalar(strobe ? 1.4 : 0.2 + 0.8 * pulse);
         acl.color.setScalar(0.25 + 0.75 * pulse);
+        bars.color.setRGB(1, 0.42, 0.22).multiplyScalar(0.3 + 0.7 * pulse);
         lens.color.setHSL((f.t * 0.05) % 1, 0.6, 0.6 + 0.25 * pulse);
         ball.rotation.y = f.t * 0.6;
         for (const b of ballBeams) b.set(0.12 + 0.16 * pulse);
@@ -523,7 +597,11 @@ export function build(ctx: BuildContext): VenueHooks {
       night = time.night;
       spots.visible = night;
       for (const b of ballBeams) b.mesh.visible = night;
-      if (!night) for (const m of [dots, acl, lens]) m.color.set('#2a2c30');
+      if (!night) for (const m of [dots, acl, lens, bars]) m.color.set('#2a2c30');
+      // by day the café's tubes are on and the hall's sign is off
+      tubes.color.set(night ? '#5a3a34' : '#fff1e2');
+      neon.color.setScalar(night ? 1 : 0.25);
+      signMat.color.setScalar(night ? 1 : 0.55);
       stages.setTime(night);
     },
   };

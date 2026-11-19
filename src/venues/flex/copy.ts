@@ -5,11 +5,11 @@ const OSM = 'Map data © <a href="https://www.openstreetmap.org/copyright" rel="
 /** What the page says while you stand somewhere. */
 export const TEXT = {
   rooms: {
-    hall: 'A closed-off stretch of the old Stadtbahn gallery under the Franz-Josefs-Kai, the club since 1995. Black walls, a flat ceiling of beams and ducts, a dance strip on one side and a raised side with the bar and the mixing desk on the other.',
-    cafe: 'The pavilion built in front of the hall in 2007: a low red ceiling, a bar, steps to sit on along the canal side and a small stage at the far end.',
+    hall: 'A closed-off stretch of the old Stadtbahn gallery under the Franz-Josefs-Kai, the club since 1995. Black walls, a flat ceiling of beams and ducts. The bar is on the left under its sign; nearer the stage the left side is raised, with the mixing desk on it.',
+    cafe: 'The pavilion built in front of the hall in 2007: a low red ceiling, the bar on a raised side reached by three winding steps edged in red light, leather sofas on castors, and a small stage at the far end.',
     foyer: 'Cashier on the left, the cloakroom on the right, the café ahead, the hall through the old quay wall.',
     wc: 'The toilets are known for one wall, the Zuckerlwand: sweets from floor to ceiling.',
-    quay: 'The lower quay of the Donaukanal, six or seven metres below the street. The walls along here have been a legal place to spray since 1994.',
+    quay: 'The lower quay of the Donaukanal, six or seven metres below the street. The walls along here have been a legal place to spray since 1994. The painted heads by the garden are invented, in the spirit of the boards that stood there.',
   },
   views: {
     bridge: 'The Augartenbrücke, 1931. Flex is the low black building on the quay below, between the bridge and Schottenring station.',

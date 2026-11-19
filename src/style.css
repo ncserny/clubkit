@@ -436,3 +436,86 @@ html[data-cw-state='fallback'] :is(#cw-intro, #cw-views, #cw-canvas, .cw-loader)
     justify-content: flex-start;
   }
 }
+
+/* ---- the venue chooser: shown when the address names no venue ---- */
+.cw-choose {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: 1.5rem;
+  text-align: center;
+  background: #0b0b0c;
+  overflow-y: auto;
+}
+html[data-cw-state='choose'] .cw-choose {
+  display: flex;
+}
+html[data-cw-state='choose'] :is(.cw-bar, #cw-intro, .cw-caption, .cw-views, .cw-detail, .cw-loader, .cw-joystick, #cw-canvas, .cw-about) {
+  display: none;
+}
+.cw-choose h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  padding-left: 0.24em;
+}
+.cw-choose-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.9rem;
+  width: min(52rem, 100%);
+  margin-top: 0.6rem;
+}
+.cw-choose-list a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1.4rem 1.2rem 1.3rem;
+  border: 1px solid var(--cw-rule);
+  border-radius: 0.9rem;
+  color: var(--cw-ink);
+  text-decoration: none;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.02);
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.cw-choose-list a:hover,
+.cw-choose-list a:focus-visible {
+  border-color: var(--cw-ink);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+  outline: none;
+}
+.cw-choose-city {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cw-muted);
+}
+.cw-choose-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cw-choose-text {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--cw-muted);
+}
+.cw-choose-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  color: rgba(236, 235, 232, 0.38);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cw-choose-list a {
+    transition: none;
+  }
+}

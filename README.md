@@ -10,7 +10,7 @@ It comes in three layers:
 
 | Venue | id | State |
 |---|---|---|
-| Ministry of Sound, London | `mos` (the default) | Fully dressed |
+| Ministry of Sound, London | `mos` | Fully dressed |
 | Berghain, Berlin | `berghain` | Fully dressed |
 | Flex, Vienna | `flex` | Dressed: fitted out from the kit, surfaces painted from the club's photographs of its empty rooms |
 
@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Then open the address Vite prints (normally http://localhost:5173). `npm run dev:mos`, `npm run dev:berghain` and `npm run dev:flex` open a venue directly. `?venue=<id>` picks a venue; without it the page shows the one named in the `VITE_VENUE` environment variable, or the default in `src/venues/index.ts`.
+Then open the address Vite prints (normally http://localhost:5173). `npm run dev:mos`, `npm run dev:berghain` and `npm run dev:flex` open a venue directly. `?venue=<id>` picks a venue; without it the page lists the venues to choose from (`catalogue` in `src/venues/index.ts`), unless the build was made for one with the `VITE_VENUE` environment variable.
 
 `npm run build` writes a static site to `dist/` (relative paths, so it can be served from any folder). `npm run typecheck` runs TypeScript.
 
@@ -236,7 +236,7 @@ Not affiliated with Ministry of Sound. The name and the crest are the club's and
 
 **Measured.** From the club's own technical drawings: the stage (1.02 m high, 5.7 m wide), the speaker columns 4.88 m apart, the mixing desk 7.86 m from the stage, the 5 by 3 m LED wall, the 19 by 8 grid of spots.
 
-**From photographs.** The stage stands between two black pillars that carry the speaker columns, with the mouths of two bass horns open under its deck and a red ticker over each. A ring of truss hangs low in front of it with a lens ball in the middle. The raised side is only the last stretch before the stage, with curved concrete steps at its corner, red tube handrails, and two square columns chalked "Rauchen verboten" and "VIP". A wire mesh covers the upper part of the inland wall under a silver duct. `textures.ts` paints the surfaces: matt black masonry with tags, a pale worn screed, quay paving, tiles, and the wall of sweets in the toilets.
+**From photographs.** The stage stands between two black pillars that carry the speaker columns, with the mouths of two bass horns open under its deck and a red ticker over each. A ring of truss hangs low in front of it with a lens ball in the middle. The raised side is only the last stretch before the stage, with curved concrete steps at its corner, red tube handrails, and two square columns chalked "Rauchen verboten" and "VIP". A wire mesh covers the upper part of the inland wall under a silver duct. `textures.ts` paints the surfaces: matt black masonry with tags, a pale worn screed, quay paving, tiles, and the wall of sweets in the toilets. The café follows its photographs too: the bar on a raised side behind three winding steps edged in red light, sofas on castors, a deck on scissor legs. Over the hall's bar hangs the COCKTAILS sign, and over the door the club's logo in bulbs (`logo.svg`, the club's own file). The painted heads along the garden are invented, in the spirit of the boards that stood there; they copy none of the real ones.
 
 **Guessed.** The length of the hall, the height of the street above the quay, where the door, the cashier, the cloakroom and the toilets are, and how the café and the hall lie against each other.
 
@@ -556,4 +556,4 @@ Suggested credit: [Built with Club Kit by Nader Cserny](https://github.com/ncser
 
 For promotional or other commercial use, contact [Nader Cserny](https://github.com/ncserny) for permission.
 
-**Not covered by the license:** `src/venues/mos/crest.png` is Ministry of Sound's own artwork, used only to identify the building, and the names of the clubs and artists are theirs. Map data in each venue's `osm.json` is © OpenStreetMap contributors under the Open Database License.
+**Not covered by the license:** `src/venues/mos/crest.png` is Ministry of Sound's own artwork and `src/venues/flex/logo.svg` is Flex's own logo; both are used only to identify the buildings. The names of the clubs and artists are theirs. Map data in each venue's `osm.json` is © OpenStreetMap contributors under the Open Database License.

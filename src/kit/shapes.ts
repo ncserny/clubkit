@@ -63,6 +63,16 @@ export function quad4(p: THREE.Vector3[], us = 1, vs = 1) {
   return g;
 }
 
+/** A slab over any outline on the floor, between two heights: for a counter that is not square, a step with a curved edge. */
+export function prism(outline: Pt[], y0: number, y1: number) {
+  const shape = new THREE.Shape(outline.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const g = new THREE.ExtrudeGeometry(shape, { depth: y1 - y0, bevelEnabled: false });
+  // the shape is drawn on x, -z and pushed out along z; standing it up puts it on the floor
+  g.rotateX(-Math.PI / 2);
+  g.translate(0, y0, 0);
+  return g;
+}
+
 /** A point at a height. */
 export const at = ([x, z]: Pt, y: number) => new THREE.Vector3(x, y, z);
 

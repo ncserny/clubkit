@@ -1,9 +1,9 @@
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import type { Batch } from '../engine/geom';
 import type { Quality } from '../engine/quality';
 import type { Pt } from '../engine/types';
 import type { Mats } from './mats';
-import { box, cyl } from './shapes';
+import { box, cyl, prism } from './shapes';
 
 /** Which side of its rectangle a seat's back is on. */
 export type Side = '-x' | '+x' | '-z' | '+z';
@@ -93,13 +93,4 @@ function slab(c: Pt[], y0: number, y1: number) {
   // an axis-aligned counter is a plain box; otherwise build the eight corners
   if (new Set(xs.map((v) => v.toFixed(6))).size <= 2 && new Set(zs.map((v) => v.toFixed(6))).size <= 2) return box(Math.min(...xs), Math.min(...zs), Math.max(...xs), Math.max(...zs), y0, y1);
   return prism(c, y0, y1);
-}
-
-function prism(c: Pt[], y0: number, y1: number) {
-  const shape = new THREE.Shape(c.map(([x, z]) => new THREE.Vector2(x, -z)));
-  const g = new THREE.ExtrudeGeometry(shape, { depth: y1 - y0, bevelEnabled: false });
-  // the shape is drawn on x, -z and pushed out along z; standing it up puts it on the floor
-  g.rotateX(-Math.PI / 2);
-  g.translate(0, y0, 0);
-  return g;
 }

@@ -1,17 +1,45 @@
 import { start } from './engine/app';
-import { DEFAULT_VENUE, isVenue, venues } from './venues';
+import { catalogue, isVenue, venues } from './venues';
 
-/** Which venue: ?venue= in the address, else the one the build was made for. */
+/** Which venue: ?venue= in the address, else the one the build was made for, else none: the visitor chooses. */
 function chosen() {
   const asked = new URLSearchParams(location.search).get('venue');
   if (isVenue(asked)) return asked;
   const built = import.meta.env.VITE_VENUE as string | undefined;
-  return isVenue(built) ? built : DEFAULT_VENUE;
+  return isVenue(built) ? built : null;
 }
 
-venues[chosen()]()
-  .then(start)
-  .catch((error) => {
-    console.error(error);
-    document.documentElement.dataset.cwState = 'fallback';
-  });
+/** List the venues and wait for a choice. A choice is a link, so it can be opened in a new tab and shared. */
+function choose() {
+  const list = document.getElementById('cw-choose-list');
+  if (!list) return;
+  for (const v of catalogue) {
+    const a = document.createElement('a');
+    const url = new URL(location.href);
+    url.searchParams.set('venue', v.id);
+    a.href = url.pathname + url.search;
+    for (const [cls, text] of [
+      ['cw-choose-city', v.city],
+      ['cw-choose-name', v.name],
+      ['cw-choose-text', v.text],
+    ]) {
+      const span = document.createElement('span');
+      span.className = cls;
+      span.textContent = text;
+      a.append(span);
+    }
+    list.append(a);
+  }
+  document.title = 'Club Kit: choose a club';
+  document.documentElement.dataset.cwState = 'choose';
+}
+
+const venue = chosen();
+if (venue) {
+  venues[venue]()
+    .then(start)
+    .catch((error) => {
+      console.error(error);
+      document.documentElement.dataset.cwState = 'fallback';
+    });
+} else choose();

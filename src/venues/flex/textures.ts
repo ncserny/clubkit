@@ -414,6 +414,181 @@ export function notice(lines: string[], seed: number) {
   });
 }
 
+/**
+ * The painted boards along the garden: a row of mask-like heads in flat colour, eyes wide, every
+ * one patterned differently, with a band of eyes along the top. Painted here from scratch in
+ * the spirit of the wall that stood there; it copies no head of the real one. One tile is 16 m by 5 m.
+ */
+export function mural(seed: number) {
+  return canvasTexture(2048, 640, (c, w, h) => {
+    const rand = rng(seed);
+    const P = { red: '#e8362c', yellow: '#f6c21c', pink: '#f07ab4', blue: '#3f8fd6', sky: '#8fd0ee', black: '#16161a', cream: '#f3ead8', teal: '#1f9a8c', violet: '#7a55b8', orange: '#f08a24' };
+    const all = Object.values(P);
+    const pick = (not?: string) => {
+      let v = all[Math.floor(rand() * all.length)];
+      while (v === not) v = all[Math.floor(rand() * all.length)];
+      return v;
+    };
+    const eye = (x: number, y: number, rx: number, ry: number, iris: string) => {
+      c.fillStyle = P.cream;
+      c.beginPath();
+      c.moveTo(x - rx, y);
+      c.quadraticCurveTo(x, y - ry * 1.5, x + rx, y);
+      c.quadraticCurveTo(x, y + ry * 1.5, x - rx, y);
+      c.fill();
+      for (const [k, col] of [[0.62, iris], [0.42, P.sky], [0.22, P.black]] as [number, string][]) {
+        c.fillStyle = col;
+        c.beginPath();
+        c.arc(x, y, ry * k * 1.5, 0, Math.PI * 2);
+        c.fill();
+      }
+    };
+    /** Fill a box with one of a few patterns in a second colour. */
+    const pattern = (x: number, y: number, bw: number, bh: number, ink: string, kind: number) => {
+      c.save();
+      c.beginPath();
+      c.rect(x, y, bw, bh);
+      c.clip();
+      c.strokeStyle = ink;
+      c.fillStyle = ink;
+      c.lineWidth = 5;
+      if (kind === 0) for (let yy = y + 8; yy < y + bh; yy += 18) {
+        c.beginPath();
+        for (let xx = x; xx <= x + bw; xx += 6) c.lineTo(xx, yy + 5 * Math.sin((xx - x) * 0.22));
+        c.stroke();
+      }
+      else if (kind === 1) for (let yy = y + 10; yy < y + bh; yy += 20) for (let xx = x + 10 + ((yy / 20) % 2) * 10; xx < x + bw; xx += 20) c.fillRect(xx - 3, yy - 3, 6, 6);
+      else if (kind === 2) for (let xx = x + 6; xx < x + bw; xx += 16) c.fillRect(xx, y, 6, bh);
+      else for (let i = 0; i < (bw * bh) / 900; i++) {
+        const sx = x + rand() * bw;
+        const sy = y + rand() * bh;
+        c.beginPath();
+        for (let a = 0; a < 4; a++) {
+          c.moveTo(sx, sy);
+          c.lineTo(sx + 9 * Math.cos((a * Math.PI) / 4 + 0.3), sy + 9 * Math.sin((a * Math.PI) / 4 + 0.3));
+          c.moveTo(sx, sy);
+          c.lineTo(sx - 9 * Math.cos((a * Math.PI) / 4 + 0.3), sy - 9 * Math.sin((a * Math.PI) / 4 + 0.3));
+        }
+        c.lineWidth = 2.5;
+        c.stroke();
+      }
+      c.restore();
+    };
+    const band = h * 0.3;
+    // the upper boards: a red band with great eyes, and a wavy strip above them
+    c.fillStyle = P.red;
+    c.fillRect(0, 0, w, band);
+    pattern(0, 0, w, band * 0.3, P.pink, 0);
+    for (let x = 90; x < w; x += 300 + rand() * 80) eye(x, band * 0.66, 78, 34, P.blue);
+    // the lower boards: one head each
+    let x = 0;
+    while (x < w) {
+      const bw = Math.min(w - x, 170 + rand() * 150);
+      const ground = pick();
+      c.fillStyle = ground;
+      c.fillRect(x, band, bw, h - band);
+      // the head: a rounded block
+      const skin = pick(ground);
+      const hx = x + bw * 0.12;
+      const hw = bw * 0.76;
+      const hy = band + (h - band) * (0.08 + rand() * 0.1);
+      const hh = (h - band) * (0.72 + rand() * 0.14);
+      c.fillStyle = skin;
+      c.beginPath();
+      c.roundRect(hx, hy, hw, hh, hw * (0.2 + rand() * 0.25));
+      c.fill();
+      pattern(hx, hy, hw, hh * 0.3, pick(skin), Math.floor(rand() * 4));
+      pattern(hx, hy + hh * 0.68, hw, hh * 0.32, pick(skin), Math.floor(rand() * 4));
+      const ey = hy + hh * (0.4 + rand() * 0.08);
+      const iris = pick(skin);
+      eye(hx + hw * 0.28, ey, hw * 0.19, hw * 0.085, iris);
+      eye(hx + hw * 0.72, ey, hw * 0.19, hw * 0.085, iris);
+      // the mouth: a rounded slot with a tongue of another colour
+      c.fillStyle = P.black;
+      c.beginPath();
+      c.roundRect(hx + hw * 0.22, hy + hh * 0.6, hw * 0.56, hh * 0.13, hh * 0.06);
+      c.fill();
+      c.fillStyle = pick(P.black);
+      c.beginPath();
+      c.roundRect(hx + hw * 0.3, hy + hh * 0.635, hw * 0.4, hh * 0.06, hh * 0.03);
+      c.fill();
+      // the joint between the boards, and the bolts that hold them
+      c.fillStyle = 'rgba(0,0,0,0.5)';
+      c.fillRect(x + bw - 3, 0, 3, h);
+      c.fillStyle = 'rgba(20,20,22,0.8)';
+      for (const by of [band * 0.2, band * 0.85, band + 30, h - 40]) {
+        c.beginPath();
+        c.arc(x + 16, by, 5, 0, Math.PI * 2);
+        c.fill();
+      }
+      x += bw;
+    }
+    c.fillStyle = 'rgba(0,0,0,0.4)';
+    c.fillRect(0, band - 3, w, 4);
+    speckle(c, w, h, rand, 9000, 0.14);
+  });
+}
+
+/** The sign over the hall's bar: fat red letters, each set with a row of pale bulbs. */
+export function cocktails() {
+  return canvasTexture(1024, 160, (c, w, h) => {
+    c.clearRect(0, 0, w, h);
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.font = "900 150px 'Arial Black', Impact, sans-serif";
+    c.lineJoin = 'round';
+    const text = 'COCKTAILS';
+    const step = w / (text.length + 0.4);
+    text.split('').forEach((letter, i) => {
+      const x = step * (i + 0.7);
+      c.lineWidth = 16;
+      c.strokeStyle = '#7a0d12';
+      c.strokeText(letter, x, h / 2 + 6);
+      c.fillStyle = '#e8242c';
+      c.fillText(letter, x, h / 2 + 6);
+      // the bulbs: only where the letter is
+      c.save();
+      c.globalCompositeOperation = 'source-atop';
+      c.fillStyle = '#ffe9d2';
+      for (let yy = 14; yy < h; yy += 15) for (let xx = x - step / 2 + 6; xx < x + step / 2; xx += 15) {
+        c.beginPath();
+        c.arc(xx, yy, 2.6, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.restore();
+    });
+  });
+}
+
+/**
+ * The club's sign over the door: its own logo, as the outline of it set with bulbs. The canvas
+ * is empty until the file arrives. The logo is the club's and is not covered by the licence.
+ */
+export function bulbSign(url: string) {
+  const [w, h] = [992, 156];
+  const texture = canvasTexture(w, h, (c) => c.clearRect(0, 0, w, h));
+  const image = new Image();
+  image.onload = () => {
+    const canvas = texture.image as HTMLCanvasElement;
+    const c = canvas.getContext('2d')!;
+    c.setTransform(canvas.width / w, 0, 0, canvas.height / h, 0, 0);
+    c.clearRect(0, 0, w, h);
+    c.drawImage(image, 0, 0, w, h);
+    // keep the logo only where a bulb is: a grid of dots
+    c.globalCompositeOperation = 'destination-in';
+    c.beginPath();
+    for (let y = 3.5; y < h; y += 7) for (let x = 3.5; x < w; x += 7) {
+      c.moveTo(x + 2.7, y);
+      c.arc(x, y, 2.7, 0, Math.PI * 2);
+    }
+    c.fill();
+    c.globalCompositeOperation = 'source-over';
+    texture.needsUpdate = true;
+  };
+  image.src = url;
+  return texture;
+}
+
 export interface SurfaceOptions {
   rough?: number;
   metal?: number;
