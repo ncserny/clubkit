@@ -577,6 +577,9 @@ export interface Finishes {
   sign(name: Sign): THREE.Texture;
   /** A wire mesh in a colour, see-through between wires `cell` metres apart. */
   mesh(colour: string, cell: number, glow?: number): THREE.MeshStandardMaterial;
+  /** For the kit's components (kit/mats.ts): a speaker grille, and the LED picture. */
+  grille(colour: string, options?: { rough?: number; metal?: number; side?: THREE.Side }): THREE.MeshStandardMaterial;
+  led(): THREE.Texture;
 }
 
 // A painting is made once for the page, whoever asks first: the city's own facades and the venue share them.
@@ -639,8 +642,10 @@ export function makeFinishes(quality: Quality): Finishes {
     return m;
   };
 
-  return {
+  const finishes: Finishes = {
     painting,
+    grille: (colour, o) => finishes.surface('speaker', colour, o),
+    led: () => painting('led'),
     sign(name) {
       let t = signs.get(name);
       if (!t) signs.set(name, (t = SIGNS[name]()));
@@ -698,4 +703,5 @@ export function makeFinishes(quality: Quality): Finishes {
       });
     },
   };
+  return finishes;
 }
