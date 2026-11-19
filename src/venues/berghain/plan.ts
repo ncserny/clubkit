@@ -245,8 +245,10 @@ const times: TimeState[] = [
   },
 ];
 
+/** Where the man on the door stands: beside the portal, facing down the queue. */
+export const DOORMAN = { x: -L2 - 1.3, y: 0.085, z: DOOR_Z - 1.9 };
 const QUEUE_TEXT = 'The dirt path from Am Wriezener Bahnhof, fenced and lined with trees, straight at the short end of the building. Crowd barriers and a long wait. No sign, no logo.';
-const DOOR_TEXT = 'A deep portal in a ground floor sprayed from end to end, under a grid of narrow steel windows. Panorama Bar is behind the tall upper row, shutters down. Walk in with W.';
+const DOOR_TEXT = 'A deep portal in a ground floor sprayed from end to end, under a grid of narrow steel windows. Panorama Bar is behind the tall upper row, shutters down. The man on the door looks you over, nods, and holds an arm out: tonight you are in. Walk in with W.';
 const ABOVE_TEXT = 'The former Heizkraftwerk Friedrichshain: the Maschinenhaus (Berghain) nearest, the Kesselhaus (Halle am Berghain) behind it. The Kantine and the beer garden sit to the west, the 110 kV substation to the east, old freight tracks to the south.';
 const CLOAK_TEXT = 'Inside the door: the desk, then the long cloakroom counter. The steel stairs to the main floor are to the left.';
 const STAIR_TEXT = 'A steel staircase climbs out of the cloakroom into the old turbine hall.';
@@ -376,9 +378,8 @@ export const plan: VenuePlan = {
       start: 4.5,
       y: 0.075,
       seed: 17,
-      // the door: two at the door, one at the gate in the barriers
+      // the door: one at the door and one at the gate in the barriers. The man who decides stands on the other side of the door (DOORMAN, drawn in doorman.ts).
       staff: [
-        { x: -L2 - 1.0, y: 0.085, z: DOOR_Z - 2.3, facing: -Math.PI / 2 + 0.5, behaviour: 'bouncer' },
         { x: -L2 - 0.8, y: 0.085, z: DOOR_Z + 2.4, facing: -Math.PI / 2 - 0.4, behaviour: 'bouncer' },
         { x: -L2 - 4.2, y: 0.085, z: DOOR_Z + 2.2, facing: -Math.PI / 2, behaviour: 'bouncer' },
       ],
