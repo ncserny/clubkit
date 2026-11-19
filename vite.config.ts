@@ -21,7 +21,7 @@ const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;
 /** The chooser's cards as markup: what the script draws, written into the page so that it reads without JavaScript. */
 function cards(up: string) {
   return catalogue()
-    .map((v) => `<a href="${up}${v.id}/"><span class="cw-choose-city">${escape(v.city)}</span><span class="cw-choose-name">${escape(v.name)}</span><span class="cw-choose-text">${escape(v.text)}</span>${v.by ? `<span class="cw-choose-by">Model by ${escape(v.by)}</span>` : ''}</a>`)
+    .map((v) => `<a href="${up}${v.id}/"><span class="cw-choose-city">${escape(v.city)}</span> <span class="cw-choose-name">${escape(v.name)}</span> <span class="cw-choose-text">${escape(v.text)}</span>${v.by ? ` <span class="cw-choose-by">Model by ${escape(v.by)}</span>` : ''}</a> `)
     .join('');
 }
 const LIST = '<div id="cw-choose-list" class="cw-choose-list">';
