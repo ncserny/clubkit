@@ -1,0 +1,14 @@
+[
+  { "name": "e1-street", "k": true, "at": [14, -7, 1.7], "look": [4, 2, 2.2] },
+  { "name": "e2-gate", "k": true, "at": [3.6, -3.2, 1.7], "look": [3.2, 8, 1.8] },
+  { "name": "e3-signs", "k": true, "at": [1.5, -1.6, 1.7], "look": [1.5, 0, 2.1] },
+  { "name": "e4-banner", "k": true, "at": [8, -3, 1.7], "look": [8, 0, 1.3] },
+  { "name": "e5-yard", "k": true, "at": [3.2, 1.2, 1.7], "look": [12, 12, 2.4] },
+  { "name": "e6-bar", "k": true, "at": [14, 10.5, 1.7], "look": [12, 3, 1.4] },
+  { "name": "e7-front", "k": true, "at": [14, 6.5, 1.7], "look": [12, 14.3, 2] },
+  { "name": "e8-flank", "k": true, "at": [16, 4, 1.7], "look": [0, 5, 9] },
+  { "name": "e9-day", "k": true, "at": [10, -6, 1.7], "look": [8, 6, 2.2], "time": "day" },
+  { "name": "e10-day-front", "k": true, "at": [12, 5.5, 1.7], "look": [11, 14.3, 2], "time": "day" },
+  { "name": "e11-neighbour", "k": true, "at": [-4, -6, 1.7], "look": [-6, 0, 3], "time": "day" },
+  { "name": "e12-above", "k": true, "at": [12, -10, 16], "look": [11, 8, 0], "time": "day" }
+]

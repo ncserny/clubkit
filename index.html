@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" data-cw-state="loading">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0b0c" />
+    <title>A club in 3D</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- Every word about the venue is filled in from its plan (src/venues/<name>/copy.ts). -->
+    <canvas id="cw-canvas" tabindex="0" aria-label="3D model"></canvas>
+    <div id="cw-fade" aria-hidden="true"></div>
+
+    <header class="cw-bar">
+      <div class="cw-title">
+        <h1 id="cw-name"></h1>
+        <p id="cw-address"></p>
+      </div>
+      <div class="cw-toggles">
+        <button type="button" id="cw-time" aria-pressed="false" title="Change the time (L)"></button>
+        <button type="button" id="cw-mute" aria-pressed="false" title="Toggle sound (M)">Sound on</button>
+        <button type="button" id="cw-info-open" class="cw-round" aria-haspopup="dialog" aria-label="About this model" title="About this model (I)">i</button>
+      </div>
+    </header>
+
+    <main>
+    <section id="cw-intro" class="cw-intro">
+      <p class="cw-kicker" id="cw-kicker"></p>
+      <h2 id="cw-intro-name"></h2>
+      <p id="cw-intro-text"></p>
+      <button type="button" id="cw-start"></button>
+      <p class="cw-hint cw-hint-keys" id="cw-hint-keys"></p>
+      <p class="cw-hint cw-hint-touch" id="cw-hint-touch"></p>
+      <p class="cw-credit" id="cw-credit"></p>
+    </section>
+
+    <aside id="cw-caption" class="cw-caption" hidden aria-live="polite">
+      <h3 id="cw-caption-title"></h3>
+      <p id="cw-caption-text"></p>
+    </aside>
+
+    <nav id="cw-views" class="cw-views" aria-label="Viewpoints"></nav>
+
+    <section class="cw-about">
+      <h2 id="cw-about-heading"></h2>
+      <div id="cw-about-body"></div>
+    </section>
+    </main>
+
+    <button type="button" id="cw-detail" class="cw-detail" hidden>Detail</button>
+
+    <div id="cw-joystick" class="cw-joystick" aria-hidden="true"><div id="cw-knob"></div></div>
+
+    <div id="cw-loader" class="cw-loader" role="progressbar" aria-label="Building the model" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <p class="cw-loader-name" id="cw-loader-name"></p>
+      <div class="cw-loader-track"><div id="cw-load-bar"></div></div>
+      <p id="cw-load-label" class="cw-loader-label">Loading the engine</p>
+      <p class="cw-loader-note" id="cw-loader-note"></p>
+    </div>
+
+    <dialog id="cw-info" class="cw-info" aria-labelledby="cw-info-title">
+      <button type="button" id="cw-info-close" class="cw-round" aria-label="Close">×</button>
+      <h2 id="cw-info-title"></h2>
+      <p class="cw-info-meta" id="cw-info-meta"></p>
+      <div id="cw-info-body"></div>
+      <p class="cw-info-foot" id="cw-info-foot"></p>
+    </dialog>
+
+    <div class="cw-fallback">
+      <h2 id="cw-fallback-title">This 3D model needs WebGL</h2>
+      <p id="cw-fallback-text">This browser could not start a 3D view. Try a recent Chrome, Safari or Firefox with hardware acceleration on.</p>
+    </div>
+
+    <noscript><p class="cw-noscript">This 3D model needs JavaScript.</p></noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
