@@ -22,7 +22,10 @@
       <div class="cw-toggles">
         <button type="button" id="cw-tour" aria-pressed="false" title="Walk through every viewpoint by itself (T)">Tour</button>
         <button type="button" id="cw-time" aria-pressed="false" title="Change the time (L)"></button>
-        <button type="button" id="cw-mute" aria-pressed="false" title="Toggle sound (M)">Sound on</button>
+        <button type="button" id="cw-mute" class="cw-round" aria-pressed="false" aria-label="Mute sound" title="Mute sound (M)">
+          <svg class="cw-sound-on" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <svg class="cw-sound-off" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
         <button type="button" id="cw-info-open" class="cw-round" aria-haspopup="dialog" aria-label="About this model" title="About this model (I)">i</button>
       </div>
     </header>

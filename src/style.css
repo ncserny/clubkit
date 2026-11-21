@@ -336,6 +336,18 @@ html[data-cw-ui='off'] :is(.cw-loader, .cw-bar, #cw-intro, .cw-caption, .cw-view
   font-size: 1rem;
   line-height: 1;
 }
+#cw-mute {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#cw-mute .cw-sound-off,
+#cw-mute[aria-pressed='true'] .cw-sound-on {
+  display: none;
+}
+#cw-mute[aria-pressed='true'] .cw-sound-off {
+  display: block;
+}
 .cw-loader {
   position: fixed;
   inset: 0;
