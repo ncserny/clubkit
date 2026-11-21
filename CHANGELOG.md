@@ -29,6 +29,12 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Changed
 
+- **Berghain: where Club Kit began.** The info card says that Berghain was the first club built, and that talking about it with a friend, Tim, who wanted to build Ministry of Sound, led to Club Kit, with a link to the repository.
+- **Berghain on phones:** painted textures are made at half size on the Lite level, as Ministry of Sound's and Flex's already were. Texture memory on Lite falls from about 226 MB to a quarter of that.
+- **Berghain: fewer draw calls.** The booth and the man on the door were built from a few hundred small parts, a draw call each. Their static parts are now merged under each moving joint, one mesh per material, and parts whose materials were set up alike count as one. On Lite, 684 draw calls on the main floor become 456, and 1,818 at the queue become 1,302. They look the same.
+- **Kit: `mergeStatic`** does that merging for any figure or fitting built from many meshes, leaving alone what moves on its own.
+- **A club served at an address of its own** can point its "Clubs Worldwide" link back to the start page: `data-home` on `#cw-home`.
+- **A smaller first download.** The start page no longer loads the engine: it needs 2 kB of script instead of 188 kB (compressed). The engine is fetched once a club is chosen, together with that club. three.js is a file of its own, so a browser keeps it across clubs and across updates.
 - **Ministry of Sound and Flex by day are closed:** silent but for the room tone, where the music used to play on in empty rooms. Berghain's Sunday morning stays open.
 - **Crowds are there whenever the club is open** unless they name the times they are there, so a plan no longer lists the same time on every crowd. A crowd that belongs to a closed building (a cleaner, a sound engineer) names that time.
 - **Kit:** what an animation is told is whether the club is `open`, where it used to be told whether it was night. Decks, screens, beams and signs follow that.

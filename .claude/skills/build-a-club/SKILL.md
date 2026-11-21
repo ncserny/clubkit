@@ -59,6 +59,12 @@ If you build something another club could use, put it in `src/kit/`, export it f
 - **Never copy** a real logo, poster, mural or photograph into the model unless the user gives you the file and says to use it; even then, note in the README that the license does not cover it. Invent posters and graffiti.
 - **Name real people only as a homage**, and say that the figure and the music are not theirs.
 
+## Keep it fast on a phone
+
+- Set `textureScale: { lite: 0.5 }` in the venue's `index.ts`: a quarter of the texture memory where it matters.
+- Draw calls cost more than triangles. Put static geometry in a stage's batch, never one mesh per part; for a figure built from many meshes, call `mergeStatic` once it is built, passing what you move one by one.
+- Measure with `tools/test/measure.mjs` (draw calls, triangles, texture memory at every viewpoint) on the Lite level before and after.
+
 ## Checking
 
 Run the dev server (`npm run dev`) and:
