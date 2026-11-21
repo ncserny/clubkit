@@ -1,4 +1,5 @@
-import { start } from './engine/app';
+// The engine (and three.js with it) is loaded only once a club is chosen: the start page,
+// which only lists the clubs, needs none of it.
 import { catalogue, isVenue, venues } from './venues';
 
 /** The venue named by the last part of the path: /berghain/, /projects/clubs/flex. */
@@ -60,10 +61,11 @@ function choose() {
 const venue = chosen();
 // the way back to the chooser: one folder up from a venue's own address
 const home = document.getElementById('cw-home') as HTMLAnchorElement | null;
-if (home) home.href = fromPath() ? '../' : location.pathname;
+// a host that serves a club at an address of its own says where the start page is in `data-home`
+if (home) home.href = home.dataset.home ?? (fromPath() ? '../' : location.pathname);
 if (venue) {
-  venues[venue]()
-    .then(start)
+  Promise.all([import('./engine/app'), venues[venue]()])
+    .then(([{ start }, module]) => start(module))
     .catch((error) => {
       console.error(error);
       document.documentElement.dataset.cwState = 'fallback';

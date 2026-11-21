@@ -7,7 +7,7 @@ import { setFigureDetail } from '../../engine/people';
 import { beamGeometry, beamMaterial, dustCloud } from '../../engine/fx';
 import { barrierGeometry, boxTruss, railLine as engineRailLine, steelStair } from '../../engine/props';
 import type { BuildContext, FrameState, VenueHooks } from '../../engine/types';
-import { makeMats, makeStages } from '../../kit';
+import { makeMats, makeStages, mergeStatic } from '../../kit';
 import { graffitiWall } from '../../kit/graffiti';
 import { buildBooth } from './booth';
 import { buildDoorman } from './doorman';
@@ -897,6 +897,10 @@ export function build(ctx: BuildContext): VenueHooks {
   const stages = makeStages(ctx.quality, makeMats(ctx.quality));
   const booth = buildBooth(stages.stage(group));
   stages.finish();
+  // The booth and the man on the door are built from a few hundred small parts, a draw call
+  // each. Under each of their moving joints the parts are merged, one mesh per material.
+  mergeStatic(booth.group, [booth.runner]);
+  mergeStatic(doorman.group);
   for (const [x, z] of PODIUMS) {
     inner.add(blackMat, boxAt(x - 1.2, 4.5, z - 1.2, x + 1.2, 5.1, z + 1.2));
     inner.add(steelMat, boxAt(x - 1.22, 5.08, z - 1.22, x + 1.22, 5.12, z + 1.22));

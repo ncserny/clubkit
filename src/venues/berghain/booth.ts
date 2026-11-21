@@ -388,5 +388,6 @@ export function buildBooth(stage: Stage) {
   }
   update(0, 0);
 
-  return { group, update };
+  // `runner` is moved one by one every frame: whoever merges the booth's parts must leave it
+  return { group, update, runner };
 }

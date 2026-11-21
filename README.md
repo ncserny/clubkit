@@ -57,6 +57,8 @@ To put the built site on a site of your own, tell the build where it will live. 
 | `VITE_SITE_NAME` | `example.com` | With `VITE_SITE_HOME`, a small link back to your site on the start page |
 | `VITE_SITE_HOME` | `/` | Where that link goes |
 
+A host that serves one club at an address of its own, outside the built site's folders, can point the "Clubs Worldwide" link at the top of that page back to the start page by setting `data-home` on `#cw-home`.
+
 
 ## Controls
 
@@ -212,6 +214,10 @@ Ministry of Sound splits its dressing over more files:
 In Ministry of Sound each of the four rooms with a DJ plays its own loop: The Box `techno`, The 103 `house`, The Loft `beat` and The Baby Box `dnb`. The Box is heard only in the rooms built against it: its two tunnels, the VIP balcony, The Lounge above its passages (quietly, low end and little else), and the staff rooms behind it. The Baby Box is heard in its arch and, muffled, in the lobby that leads to it. The Loft is heard only in The Loft. The rest of the building hears The 103, the entrance tunnel and the courtyard included. Nothing is heard on Gaunt Street.
 
 **Crowds.** A crowd in the plan is a scatter, a list of people or a queue, in a room, with a behaviour and optionally a `dress` (what they wear). A scatter can be kept inside an outline (`within`) and away from fittings (`avoid`, `clear`).
+
+**Loading.** The start page loads only the list of clubs. Choosing one fetches the engine and that club together; three.js is a file of its own (`manualChunks` in `vite.config.ts`), cached across clubs. Each club is its own file too, and most of its size is its map data.
+
+**Draw calls.** Every mesh is a draw call, and on a phone draw calls cost more than triangles. Build static geometry into a `Batch` (or a kit stage), and when a figure or fitting has to be built from many separate meshes, call `mergeStatic` from the kit once it is built: it merges what does not move under each moving joint. On a phone (the Lite level) a venue should also halve its painted textures with `textureScale: { lite: 0.5 }`.
 
 **Warm-up.** During loading, `app.ts` compiles all shaders against the post-processing target for every combination of light sets a zone uses, uploads all textures and renders one frame from each viewpoint. Without this the first step into each room stutters.
 

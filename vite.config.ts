@@ -99,4 +99,18 @@ function venuePages(): Plugin {
 }
 
 // Relative paths, so the built site works from any folder on any host.
-export default defineConfig({ base: './', plugins: [siteMeta(), venuePages()] });
+export default defineConfig({
+  base: './',
+  plugins: [siteMeta(), venuePages()],
+  build: {
+    rollupOptions: {
+      output: {
+        // three.js in a file of its own: it changes far less often than the engine and the clubs,
+        // so a visitor's browser keeps it across clubs and across updates of Club Kit.
+        manualChunks: (id) => (id.includes('node_modules/three/') ? 'three' : undefined),
+      },
+    },
+    // three.js alone is about 700 kB before compression (some 180 kB over the wire)
+    chunkSizeWarningLimit: 800,
+  },
+});
