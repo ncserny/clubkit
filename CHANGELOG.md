@@ -29,6 +29,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Changed
 
+- **Engine: the sound button is an icon.** The "Sound on" button in the header is now a round button with a speaker, crossed out while the sound is off, as on the other 3D pages of nader.io. Its label for screen readers and its tooltip say what a press will do.
 - **Berghain: where Club Kit began.** The info card says that Berghain was the first club built, and that talking about it with a friend, Tim, who wanted to build Ministry of Sound, led to Club Kit, with a link to the repository.
 - **Berghain on phones:** painted textures are made at half size on the Lite level, as Ministry of Sound's and Flex's already were. Texture memory on Lite falls from about 226 MB to a quarter of that.
 - **Berghain: fewer draw calls.** The booth and the man on the door were built from a few hundred small parts, a draw call each. Their static parts are now merged under each moving joint, one mesh per material, and parts whose materials were set up alike count as one. On Lite, 684 draw calls on the main floor become 456, and 1,818 at the queue become 1,302. They look the same.

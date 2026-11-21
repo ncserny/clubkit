@@ -383,7 +383,9 @@ export async function start(venue: VenueModule) {
     setMuted(!isMuted());
     if (muteBtn) {
       muteBtn.setAttribute('aria-pressed', String(isMuted()));
-      muteBtn.textContent = isMuted() ? 'Sound off' : 'Sound on';
+      const label = isMuted() ? 'Sound is off: turn it on' : 'Mute sound';
+      muteBtn.setAttribute('aria-label', label);
+      muteBtn.title = `${label} (M)`;
     }
   }
   muteBtn?.addEventListener('click', () => {
