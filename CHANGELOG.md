@@ -29,6 +29,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Changed
 
+- **Berghain: where Club Kit began.** The info card says that Berghain was the first club built, and that talking about it with Tim Huckle, who wanted to build Ministry of Sound, led to Club Kit, with a link to the repository.
 - **Berghain on phones:** painted textures are made at half size on the Lite level, as Ministry of Sound's and Flex's already were. Texture memory on Lite falls from about 226 MB to a quarter of that.
 - **Berghain: fewer draw calls.** The booth and the man on the door were built from a few hundred small parts, a draw call each. Their static parts are now merged under each moving joint, one mesh per material, and parts whose materials were set up alike count as one. On Lite, 684 draw calls on the main floor become 456, and 1,818 at the queue become 1,302. They look the same.
 - **Kit: `mergeStatic`** does that merging for any figure or fitting built from many meshes, leaving alone what moves on its own.
