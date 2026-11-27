@@ -104,7 +104,7 @@ export function nextLevel(level: Level): Level {
 }
 
 /** What the graphics chip calls itself, when the browser will say. */
-function gpuName(renderer: THREE.WebGLRenderer) {
+export function gpuName(renderer: THREE.WebGLRenderer) {
   try {
     const gl = renderer.getContext();
     const ext = gl.getExtension('WEBGL_debug_renderer_info');

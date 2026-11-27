@@ -4,7 +4,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
-import { LEVEL_NAMES, chooseLevel, nextLevel, pickQuality } from './quality';
+import { LEVEL_NAMES, chooseLevel, gpuName, nextLevel, pickQuality } from './quality';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { setAnisotropy } from './util';
 import { buildWorld, type View, type World } from './world';
@@ -95,12 +95,16 @@ export async function start(venue: VenueModule) {
       );
     });
   };
+  const params0 = new URLSearchParams(location.search);
   await step('Loading the engine', 0.04);
   const world: World = await buildWorld(scene, renderer, venue, { coarse, quality, step });
   const nav = world.nav;
 
   // MSAA on the composer colour buffer only when the browser can resolve it for shader passes (see quality.samples).
-  const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: postProcessMsaa(renderer, quality.samples) });
+  // Half floats keep the highlights for bloom, but not every phone can draw into them (some Mali
+  // chips among them); where the browser does not say it can, use plain bytes.
+  const floatTarget = renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float');
+  const target = new THREE.WebGLRenderTarget(1, 1, { type: floatTarget ? THREE.HalfFloatType : THREE.UnsignedByteType, samples: postProcessMsaa(renderer, quality.samples) });
   const composer = new EffectComposer(renderer, target);
   composer.addPass(new RenderPass(scene, camera));
   // Contact shadows where surfaces meet: under benches, behind columns, between people.
@@ -117,6 +121,42 @@ export async function start(venue: VenueModule) {
   composer.addPass(new OutputPass());
   const grain = new ShaderPass(GrainShader);
   composer.addPass(grain);
+
+  // Some phones run the post-processing chain without an error and still put nothing but black
+  // on the screen, while the sound and the controls work. The start checks for that (see
+  // checkPicture) and then draws the scene straight to the screen instead, without bloom and grain.
+  let post = params0.get('post') !== '0';
+  function draw() {
+    if (post) composer.render();
+    else renderer.render(scene, camera);
+  }
+  /** True when the frame just drawn has anything but black in it. Called right after draw(), in the same task. */
+  function pictureShows() {
+    const gl = renderer.getContext();
+    const w = gl.drawingBufferWidth;
+    const h = gl.drawingBufferHeight;
+    const px = new Uint8Array(4);
+    // a grid of single pixels: the grain alone lifts a working frame off zero
+    for (let i = 1; i <= 5; i++) {
+      for (let j = 1; j <= 5; j++) {
+        gl.readPixels(Math.floor((w * i) / 6), Math.floor((h * j) / 6), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        if (px[0] || px[1] || px[2]) return true;
+      }
+    }
+    return false;
+  }
+  const lost = { count: 0 };
+  canvas.addEventListener('webglcontextlost', () => {
+    lost.count++;
+    root.dataset.cwGl = 'lost';
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    root.dataset.cwGl = 'restored';
+  });
+  renderer.debug.onShaderError = (gl, program, vs, fs) => {
+    root.dataset.cwGl = 'shader-error';
+    console.error('Shader did not compile', gl.getProgramInfoLog(program), gl.getShaderInfoLog(vs), gl.getShaderInfoLog(fs));
+  };
 
   function resize() {
     const w = canvas!.clientWidth || window.innerWidth;
@@ -546,13 +586,20 @@ export async function start(venue: VenueModule) {
       camera.lookAt(v.target);
       camera.updateMatrixWorld();
       world.update(0, 0, 0, camera, nav.zoneAt(v.position));
-      composer.render();
+      draw();
+      if (post && v === world.viewpoints[0] && !pictureShows()) {
+        // the first viewpoint is outside, under the sky: black there means the chain is broken
+        post = false;
+        draw();
+        console.warn(`Post-processing gave a black frame; drawing without it (${pictureShows() ? 'that works' : 'still black'})`);
+      }
     }
     camera.position.copy(here);
     for (const o of hidden) o.visible = false;
   }
 
-  composer.render();
+  root.dataset.cwPost = post ? 'on' : 'off';
+  draw();
   await step(plan.copy.loading.open, 1);
   root.dataset.cwState = 'ready';
   // ?tour=1 starts the tour by itself, for a screen that shows the club unattended
@@ -565,6 +612,14 @@ export async function start(venue: VenueModule) {
     detailBtn.title = `${quality.chosen === 'auto' ? 'Chosen for this device. ' : ''}Click for ${LEVEL_NAMES[nextLevel(quality.level)]} (reloads the model)`;
     detailBtn.hidden = false;
     detailBtn.addEventListener('click', () => chooseLevel(nextLevel(quality.level)));
+    // ?debug=1: what the graphics chip is and how the picture is drawn, readable in a screenshot from a phone
+    if (params.get('debug') === '1') {
+      const say = () => {
+        detailBtn.textContent = `Detail: ${LEVEL_NAMES[quality.level]} · ${gpuName(renderer) || 'unknown GPU'} · post ${post ? 'on' : 'off'} · ${floatTarget ? 'half float' : 'bytes'} · gl ${root.dataset.cwGl ?? 'ok'}${lost.count ? ` (lost ${lost.count}x)` : ''}`;
+      };
+      say();
+      window.setInterval(say, 2000);
+    }
   }
 
   /* info card */
@@ -613,7 +668,7 @@ export async function start(venue: VenueModule) {
       at: (id: string) => setTime(Math.max(0, plan.times.findIndex((t) => t.id === id)), true),
       time: (n = 10) => {
         const t0 = performance.now();
-        for (let i = 0; i < n; i++) composer.render();
+        for (let i = 0; i < n; i++) draw();
         // reading a pixel back waits for the GPU, so the time is the real cost of a frame
         const gl = renderer.getContext();
         gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
@@ -813,7 +868,7 @@ export async function start(venue: VenueModule) {
     bloom.strength = zone.inside ? 0.85 : world.time().bloom;
     grain.uniforms.time.value = t;
     renderer.toneMappingExposure = zone.exposure ?? 1;
-    if (drawing) composer.render();
+    if (drawing) draw();
     if (import.meta.env.DEV) {
       const ms = performance.now() - f0;
       if (ms > 50) hitches.push({ ms: Math.round(ms), zone: zone.id, programs: renderer.info.programs?.length ?? 0 });
