@@ -175,6 +175,11 @@ export async function start(venue: VenueModule) {
     }
     cap.hidden = !c;
   }
+  // the X puts the words away until the next viewpoint or room brings new ones
+  $('cw-caption-close')?.addEventListener('click', () => {
+    const cap = $('cw-caption');
+    if (cap) cap.hidden = true;
+  });
 
   function goTo(v: View, instant = false) {
     current = v;

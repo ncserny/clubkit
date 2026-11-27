@@ -171,6 +171,27 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+.cw-caption-close {
+  float: right;
+  margin: -0.35rem -0.45rem 0 0.5rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 1px solid var(--cw-rule);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cw-muted);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.cw-caption-close:hover,
+.cw-caption-close:focus-visible {
+  color: var(--cw-ink);
+  outline: none;
+  border-color: var(--cw-ink);
+}
 .cw-caption h3 {
   margin: 0 0 0.3rem;
   font-size: 0.875rem;
