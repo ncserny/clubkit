@@ -4,6 +4,10 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ## [Unreleased]
 
+### Fixed
+
+- **Engine: black picture on some phones.** On a Samsung Galaxy A15 the model showed nothing but black while the sound and the controls worked. The start now checks the first frame it draws (from the first viewpoint, outside): if the post-processing gave nothing but black, the club is drawn straight to the screen instead, without bloom and grain. The post-processing buffer uses half floats only where the browser says it can draw into them, and plain bytes otherwise. `?post=0` turns post-processing off by hand, and `?debug=1` shows the graphics chip, how the picture is drawn and whether the WebGL context was lost, in the Detail button, for a screenshot from a phone.
+
 ### Added
 
 - **Engine: the caption can be closed.** The words about a viewpoint or a room now have an X in their corner, as on the Wienzeile and Boxhagener Platz tours. On a phone the caption covers part of the view, so this lets the visitor put it away. It stays closed until the next viewpoint or room brings new words.
