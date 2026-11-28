@@ -135,6 +135,15 @@ export function setCrowdBeat(beat: number) {
   beatUniform.value = beat;
 }
 
+/** How far apart in time dancers hit the kick, in beats, and how long the drop into it takes. */
+const KICK_SPREAD = 0.08;
+const KICK_ATTACK = 0.14;
+/** The shape of a dancer's move on each beat: 0 on the kick, 1 a moment after it, back to near 0 by the next. */
+function kickAt(beat: number) {
+  const x = (((beat % 1) + 1) % 1) / KICK_ATTACK;
+  return x * Math.exp(1 - x);
+}
+
 const POSE = /* glsl */ `
 attribute float aPart;
 attribute vec3 aMove; // phase, how much they move, how high the arms are held
@@ -154,25 +163,40 @@ vec3 bhRotX(vec3 p, float a) { float c = cos(a); float s = sin(a); return vec3(p
 vec3 bhRotZ(vec3 p, float a) { float c = cos(a); float s = sin(a); return vec3(c * p.x - s * p.y, s * p.x + c * p.y, p.z); }
 vec3 bhPose(vec3 p, float w) {
   float amp = aMove.y;
-  float b = uBeat * 3.14159265 + aMove.x;
+  // Everyone moves to the same kick, each a few milliseconds early or late, not on a wave of their own.
+  float beat = uBeat + (aMove.x / 6.2831853 - 0.5) * ${KICK_SPREAD.toFixed(3)};
+  float k = fract(beat);
+  // the kick: a quick drop in the first part of the beat, eased back up by the next one
+  float x = k / ${KICK_ATTACK.toFixed(3)};
+  float kick = x * exp(1.0 - x);
+  // the weight steps from one foot to the other on every beat
+  float foot = mod(floor(beat), 2.0) * 2.0 - 1.0;
+  float shift = foot * (2.0 * smoothstep(0.0, 0.35, k) - 1.0);
   bool upper = aPart > 0.5 && aPart < 2.5;
   bool fore = aPart > 4.5;
   if (upper || fore) {
     float side = (aPart < 1.5 || (fore && aPart < 5.5)) ? -1.0 : 1.0;
-    float raise = aMove.z + sin(b + side * 0.9) * 0.24 * amp;
-    float bend = 0.25 + (0.85 + 0.5 * sin(b * 0.5 + side * 1.3)) * min(1.0, amp + 0.15);
+    // the arm on the side the weight goes to pumps harder; the elbows stay bent
+    float pump = kick * (0.6 + 0.4 * step(0.0, side * foot));
+    float raise = aMove.z + (pump * 0.34 - 0.08) * amp;
+    float bend = 0.4 + (0.75 + 0.45 * pump) * min(1.0, amp + 0.15);
     vec3 elbow = vec3(side * ${SHOULDER_X.toFixed(2)}, ${ELBOW_Y.toFixed(2)}, 0.0);
     vec3 shoulder = vec3(side * ${SHOULDER_X.toFixed(2)}, ${SHOULDER_Y.toFixed(2)}, 0.0);
     if (fore) p = bhRotX(p - elbow * w, -bend) + elbow * w;
     p = bhRotX(p - shoulder * w, -raise) + shoulder * w;
     p = bhRotZ(p - shoulder * w, side * (0.05 + 0.05 * amp)) + shoulder * w;
   } else if (aPart > 2.5 && aPart < 3.5) {
+    // a sharp nod on the kick
     vec3 neck = vec3(0.0, 1.5, 0.0);
-    p = bhRotX(p - neck * w, 0.05 + sin(b) * 0.11 * amp) + neck * w;
+    p = bhRotX(p - neck * w, 0.04 + kick * 0.26 * amp) + neck * w;
   }
+  // only dancers bounce and step; people standing or sitting just nod along
+  float dancing = smoothstep(0.45, 0.6, amp);
+  // the knees give on the kick: the body drops over feet that stay put
+  p.y -= kick * 0.05 * amp * dancing * smoothstep(0.2, 0.55, p.y) * w;
   float h = max(0.0, p.y - 0.9) * w;
-  p.x += sin(b * 0.5) * 0.06 * h * amp;
-  p.z += cos(b) * 0.035 * h * amp;
+  p.x += shift * 0.025 * h * amp * dancing;
+  p.z += kick * 0.03 * h * amp * dancing;
   return p;
 }
 `;
@@ -349,11 +373,15 @@ export class Crowd {
       const b = beat + p.phase * 0.08;
       switch (p.behaviour) {
         case 'dance': {
-          const pulse = Math.abs(Math.sin(b * Math.PI));
-          y += pulse * 0.07 * p.amp;
-          rx = Math.sin(b * Math.PI) * 0.06 * p.amp;
-          rz = Math.sin(b * Math.PI * 0.5 + p.phase) * 0.07 * p.amp;
-          ry += Math.sin(t * 0.3 + p.phase) * 0.5;
+          // on the kick, the same timing as the shader: lean into it, feet on the floor, and turn only a little
+          const own = beat + (p.phase / (2 * Math.PI) - 0.5) * KICK_SPREAD;
+          const kick = kickAt(own);
+          const k = own - Math.floor(own);
+          const foot = Math.floor(own) % 2 === 0 ? -1 : 1;
+          rx = (0.03 + kick * 0.04) * p.amp;
+          const step = Math.min(1, k / 0.35);
+          rz = foot * (2 * step * step * (3 - 2 * step) - 1) * 0.02 * p.amp;
+          ry += Math.sin(t * 0.13 + p.phase) * 0.18;
           break;
         }
         case 'dj':
