@@ -96,8 +96,21 @@ export async function buildWorld(scene: THREE.Scene, renderer: THREE.WebGLRender
   const nav = buildNav(plan, frame, city.solids, city.obstacles, sunken);
   await opts.step(plan.copy.loading.lights, 0.72);
 
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  // The soft light from all around. PMREM draws into half floats, so a phone that cannot gets a
+  // plain ambient light instead, following scene.environmentIntensity as the environment would.
+  if (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float')) {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  } else {
+    const ambient = new THREE.AmbientLight('#ffffff', 0);
+    scene.add(ambient);
+    const before = scene.onBeforeRender;
+    scene.onBeforeRender = function (...args) {
+      // matched by eye to the room environment on the nader.io tours
+      ambient.intensity = scene.environmentIntensity * 4;
+      before.apply(this, args);
+    };
+  }
 
   const hemi = new THREE.HemisphereLight('#4a5470', '#1a1612', 0.4);
   scene.add(hemi);

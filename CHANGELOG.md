@@ -6,6 +6,7 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ### Fixed
 
+- **Engine: the black-picture check is no longer fooled by the grain.** On a phone that says it can draw into half floats but cannot, the post-processing gives a black frame with only grain on it, and the check from the fix below took the grain for a picture. The start now draws the first viewpoint both ways, straight to the screen and through the chain, and drops the chain when the direct frame shows something and the chain gives less than a third of it. A phone that does not offer half floats at all now draws straight to the screen from the start (bytes clip the sky and the lights before tone mapping, and bloom and contact shadows need half floats of their own), and gets a plain ambient light in place of the room environment, whose prefiltering also draws into half floats.
 - **Engine: black picture on some phones.** On a Samsung Galaxy A15 the model showed nothing but black while the sound and the controls worked. The start now checks the first frame it draws (from the first viewpoint, outside): if the post-processing gave nothing but black, the club is drawn straight to the screen instead, without bloom and grain. The post-processing buffer uses half floats only where the browser says it can draw into them, and plain bytes otherwise. `?post=0` turns post-processing off by hand, and `?debug=1` shows the graphics chip, how the picture is drawn and whether the WebGL context was lost, in the Detail button, for a screenshot from a phone.
 
 ### Added
