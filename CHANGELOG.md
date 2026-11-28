@@ -4,6 +4,10 @@ Everything notable that changes in Club Kit, newest first. The format follows [K
 
 ## [Unreleased]
 
+### Changed
+
+- **Engine: the crowd dances like it is at a techno night.** Dancers used to roll from side to side on slow waves four beats long, each on a wave of their own, which looked like standing on a ferry. Now everyone moves to the same kick, each a few milliseconds early or late: the knees give on every beat with the feet on the floor, the head nods sharply, the bent arms pump, and the weight steps from one foot to the other. The slow turning is a third of what it was. People standing, talking or sitting only nod along. This changes every venue's dance floor.
+
 ### Fixed
 
 - **Engine: the black-picture check is no longer fooled by the grain.** On a phone that says it can draw into half floats but cannot, the post-processing gives a black frame with only grain on it, and the check from the fix below took the grain for a picture. The start now draws the first viewpoint both ways, straight to the screen and through the chain, and drops the chain when the direct frame shows something and the chain gives less than a third of it. A phone that does not offer half floats at all now draws straight to the screen from the start (bytes clip the sky and the lights before tone mapping, and bloom and contact shadows need half floats of their own), and gets a plain ambient light in place of the room environment, whose prefiltering also draws into half floats.
