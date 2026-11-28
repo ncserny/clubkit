@@ -118,32 +118,52 @@ export async function start(venue: VenueModule) {
   }
   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.7, 0.55, 0.82);
   composer.addPass(bloom);
+  // bloom and the contact shadows draw into half floats of their own
+  if (!floatTarget) {
+    bloom.enabled = false;
+    if (gtao) gtao.enabled = false;
+  }
   composer.addPass(new OutputPass());
   const grain = new ShaderPass(GrainShader);
   composer.addPass(grain);
 
   // Some phones run the post-processing chain without an error and still put nothing but black
-  // on the screen, while the sound and the controls work. The start checks for that (see
-  // checkPicture) and then draws the scene straight to the screen instead, without bloom and grain.
-  let post = params0.get('post') !== '0';
+  // on the screen, while the sound and the controls work. Without half floats the chain would also
+  // clip the sky and the lights before the tone mapping, so such a phone draws straight to the
+  // screen from the start, without bloom and grain. Where the browser says it can, the start still
+  // compares the two ways of drawing (see brightness) and drops the chain if it comes out black.
+  let post = floatTarget && params0.get('post') !== '0';
   function draw() {
     if (post) composer.render();
     else renderer.render(scene, camera);
   }
-  /** True when the frame just drawn has anything but black in it. Called right after draw(), in the same task. */
-  function pictureShows() {
+  /**
+   * The sum of r+g+b at a grid of 25 pixels of the frame just drawn. Called right after a draw, in
+   * the same task. A broken chain is not plain zero: the grain alone lifts a black frame a little
+   * (a sum near 40), so the check compares with a direct frame rather than looking for zero.
+   */
+  function brightness() {
     const gl = renderer.getContext();
     const w = gl.drawingBufferWidth;
     const h = gl.drawingBufferHeight;
     const px = new Uint8Array(4);
-    // a grid of single pixels: the grain alone lifts a working frame off zero
+    let sum = 0;
     for (let i = 1; i <= 5; i++) {
       for (let j = 1; j <= 5; j++) {
         gl.readPixels(Math.floor((w * i) / 6), Math.floor((h * j) / 6), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-        if (px[0] || px[1] || px[2]) return true;
+        sum += px[0] + px[1] + px[2];
       }
     }
-    return false;
+    return sum;
+  }
+  /** The shaders for drawing straight to the screen, built now rather than on the first frame. */
+  async function compileForScreen() {
+    renderer.setRenderTarget(null);
+    try {
+      await renderer.compileAsync(scene, camera);
+    } catch {
+      // compiled on first draw instead
+    }
   }
   const lost = { count: 0 };
   canvas.addEventListener('webglcontextlost', () => {
@@ -587,17 +607,26 @@ export async function start(venue: VenueModule) {
       camera.updateMatrixWorld();
       world.update(0, 0, 0, camera, nav.zoneAt(v.position));
       draw();
-      if (post && v === world.viewpoints[0] && !pictureShows()) {
-        // the first viewpoint is outside, under the sky: black there means the chain is broken
-        post = false;
-        draw();
-        console.warn(`Post-processing gave a black frame; drawing without it (${pictureShows() ? 'that works' : 'still black'})`);
+      if (post && v === world.viewpoints[0]) {
+        // the first viewpoint is outside, under the sky: draw it straight to the screen as well,
+        // and if that shows something the chain turns (nearly) black, the chain is broken
+        const through = brightness();
+        renderer.setRenderTarget(null);
+        renderer.render(scene, camera);
+        const plain = brightness();
+        if (plain > 75 && through < plain * 0.3) {
+          post = false;
+          console.warn(`Post-processing gave a black frame (${through} against ${plain}); drawing without it`);
+          await compileForScreen();
+        }
       }
     }
     camera.position.copy(here);
     for (const o of hidden) o.visible = false;
   }
 
+  // the warm-up built the shaders for the composer's buffer; without it, build the ones for the screen
+  if (!post) await compileForScreen();
   root.dataset.cwPost = post ? 'on' : 'off';
   draw();
   await step(plan.copy.loading.open, 1);
